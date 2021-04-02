@@ -20,14 +20,13 @@ titlepage-rule-height: 2
 library(tidyverse)
 # this should supress all code and messages
 knitr::opts_chunk$set(include=FALSE)
+
 ```
 
 
 
      
 # General comments (you can delete this section)
-
-_You can delete this section, and if you want to check what it said, just open a template from the package again. You don't have to use this particular template, but you DO need to write you report in RMarkdown and include a cover page._
 
 _The cover page must have:_
 
