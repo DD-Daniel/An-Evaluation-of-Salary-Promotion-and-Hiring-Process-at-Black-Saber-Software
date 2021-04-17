@@ -20,7 +20,6 @@ titlepage-rule-height: 2
 library(tidyverse)
 # this should supress all code and messages
 knitr::opts_chunk$set(include=FALSE)
-
 ```
 
 # General comments (you can delete this section)
@@ -80,7 +79,7 @@ my_plot <- black_saber_current_employees %>%
 # saving this means you can add the image to your exectuve summary without having to run or rerun the code, if you wish
 ggsave("images/example.png", width = 7, height = 4)
 
-# notice how the image is included with the ![](file/path.png) below
+# norice how the image is included with the ![](file/path.png) below
 ```
 
 ![](images/example.png)
