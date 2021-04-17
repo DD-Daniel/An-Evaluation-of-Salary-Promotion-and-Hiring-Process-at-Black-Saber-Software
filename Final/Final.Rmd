@@ -20,6 +20,8 @@ titlepage-rule-height: 2
 library(tidyverse)
 # this should supress all code and messages
 knitr::opts_chunk$set(include=FALSE)
+bkjbkjbkb
+asdasds
 ```
 
 # General comments (you can delete this section)
