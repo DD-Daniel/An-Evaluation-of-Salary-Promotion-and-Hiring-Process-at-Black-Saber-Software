@@ -1,7 +1,7 @@
 ---
 title: "Report title"
 subtitle: "Subtitle"
-author: "Report prepared for Black Saber Software by Eminence Analytics"
+author: "Report prepared for Black Saber Software by Calabash Brothers Solutions"
 date: 2021-04-21
 lang: "en"
 output:
@@ -22,17 +22,6 @@ library(tidyverse)
 knitr::opts_chunk$set(include=FALSE)
 ```
 
-# General comments (you can delete this section)
-
-_You can delete this section, and if you want to check what it said, just open a template from the package again. You don't have to use this particular template, but you DO need to write you report in RMarkdown and include a cover page._
-
-_The cover page must have:_
-
-*	_A title and subtitle_
-* _"Report prepared for Black Saber Software by" your company name_
-*	_Date (assessment submission date is fine)_
-
-_You can change the colour of this cover to any colour you would like by replacing 6C3082 in the YAML above (line 11) to another hex code. You could use this tool to help you:_ https://htmlcolorcodes.com/color-picker/
 
 \newpage
 # Executive summary
