@@ -55,17 +55,14 @@ _For each research question, you will want to briefly describe any data manipula
 # This chunk provides an example of some things you can do with RMarkdown to make your report creation process easier
 
 # read in the data
-black_saber_current_employees <- read_csv("data/black-saber-current-employees.csv")
+cemployees <- read_csv("data/black-saber-current-employees.csv")
 phase1 <- read_csv("data/phase1-new-grad-applicants-2020.csv")
 phase2 <- read_csv("data/phase2-new-grad-applicants-2020.csv")
 phase3 <- read_csv("data/phase3-new-grad-applicants-2020.csv")
-<<<<<<< HEAD
 final_hire <- read_csv("data/final-hires-newgrad_2020.csv")
-=======
-final_hires = read_csv("data/final-hires-newgrad_2020.csv")
->>>>>>> 6dee1cfe5a56ccf23dc6437385ea343e6486843f
 
-# create a visualisation
+
+# create a visualization
 my_plot <- black_saber_current_employees %>% 
   ggplot(aes(x = productivity)) +
   geom_histogram(colour = "grey", fill = "#6C3082") +
@@ -89,6 +86,14 @@ library(tidyverse)
 library(lme4)
 ```
 
+```{r}
+## Join Phase 1 and Phase 2
+joint12 <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))
+
+## Build Logistic regression model to explain whether or not phase 1 is passed
+model1 <- glm(pass_phase1 ~ gpa + extracurriculars + work_experience + team_applied_for, family = "binomial", data = joint12) 
+summary(model1)
+```
 
 
 ```{r}
