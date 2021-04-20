@@ -77,7 +77,7 @@ ggsave("images/example.png", width = 7, height = 4)
 ```
 
 ![](images/example.png)
-
+z
 ## Informative title for section addressing a research question
 ## Informative title for section addressing a research question
 
@@ -87,11 +87,11 @@ library(lme4)
 ```
 
 ```{r}
-## Join Phase 1 and Phase 2
+## Join Phase 1 and Phase 2, create variable pass_phase1
 joint12 <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))
 
 ## Build Logistic regression model to explain whether or not phase 1 is passed
-model1 <- glm(pass_phase1 ~ gpa + extracurriculars + work_experience + team_applied_for, family = "binomial", data = joint12) 
+model1 <- glm(pass_phase1 ~ gpa + extracurriculars + work_experience + team_applied_for, family = "binomial", data = joint12)
 summary(model1)
 ```
 
@@ -106,8 +106,6 @@ black_saber_current_employees %>%
   theme_minimal() +
   scale_colour_brewer(palette = "Dark2")+
   theme(legend.position = "right")
-
-
 ```
 ## Discussion
 
