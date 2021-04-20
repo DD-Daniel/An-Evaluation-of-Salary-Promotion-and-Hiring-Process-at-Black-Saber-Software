@@ -63,7 +63,7 @@ final_hire <- read_csv("data/final-hires-newgrad_2020.csv")
 
 
 # create a visualization
-my_plot <- black_saber_current_employees %>% 
+my_plot <- cemployees %>% 
   ggplot(aes(x = productivity)) +
   geom_histogram(colour = "grey", fill = "#6C3082") +
   theme_minimal() +
@@ -98,14 +98,10 @@ summary(model1)
 
 ```{r}
 #chunk new created by Peter
-black_saber_current_employees %>%
-  filter(gender != "Prefer not to say")%>%
-  group_by(employee_id)%>%
-  ggplot(aes(x = role_seniority, y = salary, color = gender))+
-  geom_boxplot()+
-  theme_minimal() +
-  scale_colour_brewer(palette = "Dark2")+
-  theme(legend.position = "right")
+cemployees %>% 
+  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]"))
+reg_salary = lmer(salary~productivity+(1|role_seniority), data =cemployees)
+
 
 
 ```
