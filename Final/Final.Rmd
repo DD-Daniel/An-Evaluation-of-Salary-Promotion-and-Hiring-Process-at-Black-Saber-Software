@@ -98,10 +98,20 @@ summary(model1)
 
 ```{r}
 #chunk new created by Peter
-cemployees %>% 
-  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]"))
-reg_salary = lmer(salary~productivity+(1|role_seniority), data =cemployees)
+new_cemployees =  cemployees%>%
+  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
+  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
 
+reg_salary_1 = lm(salary~productivity, data =new_cemployees)
+reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
+summary(reg_salary_1)
+
+reg_salary_3 = lmer(salary~productivity+(1|role_seniority)+(1|financial_q), data =new_cemployees)
+reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1|gender), data =new_cemployees)
+
+lmtest::lrtest(reg_salary_2, reg_salary_3)
+lmtest::lrtest(reg_salary_2, reg_salary_4)
+#has gender bias
 
 
 ```
