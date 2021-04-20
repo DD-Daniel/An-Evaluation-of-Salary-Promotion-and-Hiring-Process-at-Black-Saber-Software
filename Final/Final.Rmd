@@ -1,7 +1,7 @@
 ---
 title: "Report title"
 subtitle: "Subtitle"
-author: "Report prepared for Black Saber Software by Eminence Analytics"
+author: "Report prepared for Black Saber Software by Calabash Brothers Solutions"
 date: 2021-04-21
 lang: "en"
 output:
@@ -22,17 +22,6 @@ library(tidyverse)
 knitr::opts_chunk$set(include=FALSE)
 ```
 
-# General comments (you can delete this section)
-
-_You can delete this section, and if you want to check what it said, just open a template from the package again. You don't have to use this particular template, but you DO need to write you report in RMarkdown and include a cover page._
-
-_The cover page must have:_
-
-*	_A title and subtitle_
-* _"Report prepared for Black Saber Software by" your company name_
-*	_Date (assessment submission date is fine)_
-
-_You can change the colour of this cover to any colour you would like by replacing 6C3082 in the YAML above (line 11) to another hex code. You could use this tool to help you:_ https://htmlcolorcodes.com/color-picker/
 
 \newpage
 # Executive summary
@@ -66,13 +55,15 @@ _For each research question, you will want to briefly describe any data manipula
 # This chunk provides an example of some things you can do with RMarkdown to make your report creation process easier
 
 # read in the data
-black_saber_current_employees <- read_csv("data/black-saber-current-employees.csv")
+cemployees <- read_csv("data/black-saber-current-employees.csv")
 phase1 <- read_csv("data/phase1-new-grad-applicants-2020.csv")
 phase2 <- read_csv("data/phase2-new-grad-applicants-2020.csv")
 phase3 <- read_csv("data/phase3-new-grad-applicants-2020.csv")
+final_hire <- read_csv("data/final-hires-newgrad_2020.csv")
 
-# create a visualisation
-my_plot <- black_saber_current_employees %>% 
+
+# create a visualization
+my_plot <- cemployees %>% 
   ggplot(aes(x = productivity)) +
   geom_histogram(colour = "grey", fill = "#6C3082") +
   theme_minimal() +
@@ -86,31 +77,121 @@ ggsave("images/example.png", width = 7, height = 4)
 ```
 
 ![](images/example.png)
+<<<<<<< HEAD
 
 
 
 ```{r}
 joint23 <- phase2 %>% left_join(phase3, by="applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))
 
-joint23 %>%
-  select(applicant_id,gender)%>%
-  group_by(gender) %>%
-    summarize(n = n()) %>%
-    ungroup() %>%
-    mutate(Percent = n / sum(n)*100) %>%
-    mutate(gender = factor(Gender, labels = c("Male","Female"))) %>%
-    adorn_totals("row")mjb
+
 ```
 
+=======
+z
+>>>>>>> 663f08c7f737a9979fab2770c089e3ba8e26c082
 ## Informative title for section addressing a research question
 ## Informative title for section addressing a research question
 
 ```{r, include = FALSE}
 library(tidyverse)
 library(lme4)
+<<<<<<< HEAD
+=======
+install.packages("ggmosaic")
+library(ggmosaic)
+library(knitr)
+install.packages("kableExtra")
+library(kableExtra)
+```
+
+```{r}
+## Join Phase 1 and Phase 2, create variable pass_phase1
+joint12 <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))
+
+## Draw Contingency Table
+table(factor(joint12$gender), factor(joint12$pass_phase1))
+
+## Visualize Contingency Table
+joint12 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase1), fill = gender))
+
+## Build Logistic regression model to explain whether or not phase 1 is passed
+joint12$team_applied_for <- as.factor(joint12$team_applied_for)
+model1 <- glmer(pass_phase1 ~ gpa + extracurriculars + work_experience + gender
+                + (1|team_applied_for), family = "binomial", data = joint12)
+
+summary(model1)
+ci <- confint(model1)
+table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
+               round(exp(ci[-1, ]), 2),
+               round(summary(model1)$coeff[,4],4))
+colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+kable(table)
+>>>>>>> 663f08c7f737a9979fab2770c089e3ba8e26c082
 
 ```
 
+
+```{r}
+#chunk new created by Peter
+<<<<<<< HEAD
+<<<<<<< HEAD
+black_saber_current_employees %>%
+  filter(gender != "Prefer not to say")%>%
+  group_by(employee_id)%>%
+  ggplot(aes(x = role_seniority, y = salary, color = gender))+
+  geom_boxplot()+
+  theme_minimal() +
+  scale_colour_brewer(palette = "Dark2")+
+  theme(legend.position = "right")
+=======
+cemployees %>% 
+  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]"))
+reg_salary = lmer(salary~productivity+(1|role_seniority), data =cemployees)
+
+
+
+>>>>>>> 0fe80ac6c83d44c2142886a8a0f90bfcf3fb0295
+=======
+new_cemployees =  cemployees%>%
+  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
+  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))%>%
+  filter(gender!="Prefer not to say")
+
+reg_salary_1 = lm(salary~productivity, data =new_cemployees)
+reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
+summary(reg_salary_1)
+
+reg_salary_3 = lmer(salary~productivity+(1|role_seniority)+(1|financial_q), data =new_cemployees)
+reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1|gender), data =new_cemployees)
+
+lmtest::lrtest(reg_salary_2, reg_salary_3)
+lmtest::lrtest(reg_salary_2, reg_salary_4)
+#has gender bias
+
+#create a boxplot
+new_cemployees %>%
+  ggplot(aes(x = gender,
+             y = salary,
+             color=role_seniority)) +
+  geom_boxplot() +
+  geom_point() +
+  facet_wrap(~role_seniority, nrow = 2) +
+  ggtitle(label="Salary by role seniority and gender setting") +
+  theme_bw() +
+  theme(legend.position = "right")
+
+new_cemployees %>% 
+  ggplot(aes(y = salary, x = productivity,color = gender)) +
+  geom_point()+
+  geom_line(stat="smooth", method = "lm", formula = 'y~x') +
+  facet_grid(~role_seniority) +
+  scale_x_continuous(breaks = seq(2,12, by = 4)) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme(legend.position = "right")+
+  theme_minimal()
+>>>>>>> 9847f66853a706e2d232f6e49a33ba15700e398f
+```
 ## Discussion
 
 _In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
