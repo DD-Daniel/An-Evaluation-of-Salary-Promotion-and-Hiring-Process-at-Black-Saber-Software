@@ -99,7 +99,7 @@ joint23 %>%
     ungroup() %>%
     mutate(Percent = n / sum(n)*100) %>%
     mutate(gender = factor(Gender, labels = c("Male","Female"))) %>%
-    adorn_totals("row")
+    adorn_totals("row")mjb
 ```
 
 ## Informative title for section addressing a research question
