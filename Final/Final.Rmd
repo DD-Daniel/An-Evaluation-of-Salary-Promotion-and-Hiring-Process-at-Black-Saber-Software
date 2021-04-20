@@ -1,7 +1,7 @@
 ---
 title: "Report title"
 subtitle: "Subtitle"
-author: "Report prepared for Black Saber Software by Eminence Analytics"
+author: "Report prepared for Black Saber Software by Calabash Brothers Solutions"
 date: 2021-04-21
 lang: "en"
 output:
@@ -22,17 +22,6 @@ library(tidyverse)
 knitr::opts_chunk$set(include=FALSE)
 ```
 
-# General comments (you can delete this section)
-
-_You can delete this section, and if you want to check what it said, just open a template from the package again. You don't have to use this particular template, but you DO need to write you report in RMarkdown and include a cover page._
-
-_The cover page must have:_
-
-*	_A title and subtitle_
-* _"Report prepared for Black Saber Software by" your company name_
-*	_Date (assessment submission date is fine)_
-
-_You can change the colour of this cover to any colour you would like by replacing 6C3082 in the YAML above (line 11) to another hex code. You could use this tool to help you:_ https://htmlcolorcodes.com/color-picker/
 
 \newpage
 # Executive summary
@@ -70,7 +59,11 @@ black_saber_current_employees <- read_csv("data/black-saber-current-employees.cs
 phase1 <- read_csv("data/phase1-new-grad-applicants-2020.csv")
 phase2 <- read_csv("data/phase2-new-grad-applicants-2020.csv")
 phase3 <- read_csv("data/phase3-new-grad-applicants-2020.csv")
+<<<<<<< HEAD
 final_hire <- read_csv("data/final-hires-newgrad_2020.csv")
+=======
+final_hires = read_csv("data/final-hires-newgrad_2020.csv")
+>>>>>>> 6dee1cfe5a56ccf23dc6437385ea343e6486843f
 
 # create a visualisation
 my_plot <- black_saber_current_employees %>% 
@@ -96,6 +89,21 @@ library(tidyverse)
 library(lme4)
 ```
 
+
+
+```{r}
+#chunk new created by Peter
+black_saber_current_employees %>%
+  filter(gender != "Prefer not to say")%>%
+  group_by(employee_id)%>%
+  ggplot(aes(x = role_seniority, y = salary, color = gender))+
+  geom_boxplot()+
+  theme_minimal() +
+  scale_colour_brewer(palette = "Dark2")+
+  theme(legend.position = "right")
+
+
+```
 ## Discussion
 
 _In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
