@@ -87,6 +87,21 @@ ggsave("images/example.png", width = 7, height = 4)
 
 ![](images/example.png)
 
+
+
+```{r}
+joint23 <- phase2 %>% left_join(phase3, by="applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))
+
+joint23 %>%
+  select(applicant_id,gender)%>%
+  group_by(gender) %>%
+    summarize(n = n()) %>%
+    ungroup() %>%
+    mutate(Percent = n / sum(n)*100) %>%
+    mutate(gender = factor(Gender, labels = c("Male","Female"))) %>%
+    adorn_totals("row")
+```
+
 ## Informative title for section addressing a research question
 ## Informative title for section addressing a research question
 
