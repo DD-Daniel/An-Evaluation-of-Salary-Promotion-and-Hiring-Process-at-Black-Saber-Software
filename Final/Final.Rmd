@@ -100,7 +100,8 @@ summary(model1)
 #chunk new created by Peter
 new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
-  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
+  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))%>%
+  filter(gender!="Prefer not to say")
 
 reg_salary_1 = lm(salary~productivity, data =new_cemployees)
 reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
@@ -113,7 +114,27 @@ lmtest::lrtest(reg_salary_2, reg_salary_3)
 lmtest::lrtest(reg_salary_2, reg_salary_4)
 #has gender bias
 
+#create a boxplot
+new_cemployees %>%
+  ggplot(aes(x = gender,
+             y = salary,
+             color=role_seniority)) +
+  geom_boxplot() +
+  geom_point() +
+  facet_wrap(~role_seniority, nrow = 2) +
+  ggtitle(label="Salary by role seniority and gender setting") +
+  theme_bw() +
+  theme(legend.position = "right")
 
+new_cemployees %>% 
+  ggplot(aes(y = salary, x = productivity,color = gender)) +
+  geom_point()+
+  geom_line(stat="smooth", method = "lm", formula = 'y~x') +
+  facet_grid(~role_seniority) +
+  scale_x_continuous(breaks = seq(2,12, by = 4)) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme(legend.position = "right")+
+  theme_minimal()
 ```
 ## Discussion
 
