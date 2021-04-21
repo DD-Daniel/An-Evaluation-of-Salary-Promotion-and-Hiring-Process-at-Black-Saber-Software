@@ -358,7 +358,7 @@ lmtest::lrtest(reg_salary_2, reg_salary_3)#check if role seniority as random int
 ci2 <- confint(reg_salary_3)
 ## Print Result of Regression
 reg_salary <- cbind(round(summary(reg_salary_3)$coeff[,1],2))
-rownames(reg_salary) <- c("Intecept","Productivity","GenderWomen")
+rownames(reg_salary) <- c("Intecept","Productivity","Gender: Women")
 colnames(reg_salary)=c("Estimates")
 kable(reg_salary)
 #create a boxplot
@@ -377,6 +377,10 @@ b = cemployees %>%
   group_by(employee_id)%>%
   count(role_seniority)
 colnames(b)[3] ="time_since_promotion" 
+a = cemployees %>%
+  group_by(employee_id)%>%
+  distinct(role_seniority)%>%
+  count(role_seniority)-1
   
 ```
 
