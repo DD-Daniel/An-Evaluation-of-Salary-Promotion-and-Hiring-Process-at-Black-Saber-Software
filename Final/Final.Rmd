@@ -131,8 +131,8 @@ names(proptable2)[3]=("Proportion")
 ggplot(data=proptable2, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") 
 
 
-joint23 %>% group_by(gender, team_applied_for, pass_phase2) %>% summarize(number = n())
-
+proptable3 <- joint23 %>% group_by(gender, team_applied_for, pass_phase2) %>% summarize(number = n()) %>% group_by(gender, team_applied_for) %>% summarize(pass_phase2 = pass_phase2, ratio = number/sum(number))
+ggplot(proptable3, aes(fill = factor(pass_phase2), y = ratio, x = team_applied_for)) + geom_bar(position = "fill", stat = "identity")+facet_grid(. ~ gender)
 
 ## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
 model2 <- glmer(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + (1|team_applied_for), family = "binomial", data = joint23)
@@ -143,7 +143,6 @@ summary(model3)
 
 model4 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
 summary(model4)
-
 
 ## Calculate CI
 ci2 <- confint(model3)
