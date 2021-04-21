@@ -190,7 +190,13 @@ colnames(table3) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table3)
 ```
 ### Phase 3 to Final Result
-The methodology we use to deal with this phase is different from the first two phases. Since being listed as ‘first’ or ‘second’ interviewer is arbitrary, we create a new variable "sum" that is the sum of ratings by two interviewers.
+The methodology we use to deal with this phase is different from the first two phases. Since being listed as ‘first’ or ‘second’ interviewer is arbitrary, we create a new variable "sum" that is the sum of ratings by two interviewers. After sorting the sum of ratings for applicants who engaged in the interview and select top 10 applicants to match with the actual accepted interviewees, it is found that 9 of them is perfectly matched. Therefore, we can roughly make inference that the decision made in the last stage depends mostly on the interviewers' scores. Hence, we are going to test if their is gender bias by con
+
+
+
+
+
+
 
 ```{r}
 ## Phase 3 -> Final Result
