@@ -162,7 +162,6 @@ new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
   mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
 
-
 #create a histogram of salary condition on role seniority
 new_cemployees %>%
   ggplot(aes(x = salary)) +
@@ -179,23 +178,24 @@ new_cemployees = new_cemployees%>%
 new_cemployees = new_cemployees%>%
   mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 6))
 
-reg_salary_1 = lm(salary~productivity, data =new_cemployees)
-reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
-lmtest::lrtest(reg_salary_1, reg_salary_2)#check if role seniority as random intercept(baseline) is more significant
+reg_salary_1 = lm(salary~productivity+gender, data =new_cemployees)
+reg_salary_2 = lmer(salary~productivity+gender+(1|team), data =new_cemployees)
+#lmtest::lrtest(reg_salary_1, reg_salary_2) #check if adding team as random intercept is more significant
 
-reg_salary_3 = lmer(salary~productivity+(1|role_seniority)+(1|financial_q), data =new_cemployees)
-lmtest::lrtest(reg_salary_2, reg_salary_3) #check if financial quarter as random intercept is more significant
+reg_salary_2a = lmer(salary~productivity+gender+(1+productivity|team), data =new_cemployees)
+#lmtest::lrtest(reg_salary_2, reg_salary_2a) #check if there productivity are different for different team
 
-reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1+productivity|financial_q), data =new_cemployees)
-lmtest::lrtest(reg_salary_2, reg_salary_4)
-#check if check if financial quarter as random intercept and random slope are more significant
-#productivity are affect by financial quarter(significant)
+reg_salary_3 = lmer(salary~productivity+gender+(1|team)+(1|role_seniority), data =new_cemployees)
+lmtest::lrtest(reg_salary_2, reg_salary_3)#check if role seniority as random intercept(baseline) is more significant
 
-reg_salary_5 = lmer(salary~productivity+(1|role_seniority)+(1+productivity|financial_q)+(1|gender), 
-                    data =new_cemployees) #final model
-lmtest::lrtest(reg_salary_4, reg_salary_5) 
-#check if gender as random intercept is significant
-#conclusion: has gender bias
+
+## Calculate CI
+ci2 <- confint(reg_salary_3)
+## Print Result of Regression
+reg_salary <- cbind(round(summary(reg_salary_3)$coeff[,1],2))
+rownames(reg_salary) <- c("Intecept","Productivity","GenderWomen")
+colnames(reg_salary)=c("Estimates")
+kable(reg_salary)
 
 #create a boxplot
 new_cemployees %>%
