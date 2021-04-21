@@ -130,7 +130,8 @@ names(proptable2)[2]=('Pass')
 names(proptable2)[3]=("Proportion")
 ggplot(data=proptable2, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") 
 
-table(factor(joint23$gender), factor(joint23$pass_phase2), factor(joint23$team_applied_for))
+
+joint23 %>% group_by(gender, team_applied_for, pass_phase2) %>% summarize(number = n())
 
 
 ## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
