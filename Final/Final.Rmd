@@ -274,6 +274,7 @@ table3 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
                round(exp(ci3), 2),
                round(summary(model3)$coeff[,4],4))
 colnames(table3) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table3) <- c("Intercept", "Gender: Woman", "GPA", "Technical Skills", "Writing Skills", "Leadship Presence", "Speaking Skills")
 kable(table3)
 ```
 
@@ -303,6 +304,7 @@ table5 <- cbind(round(exp(summary(model5)$coeff[,1]),2),
                round(exp(ci5), 2),
                round(summary(model5)$coeff[,4],4))
 colnames(table5) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table5) <- c("Intercept", "Technical Skills", "Writing Skills", "Leadership Presence", "Speaking Skills", "Gender: Woman")
 kable(table5)
 
 ```
