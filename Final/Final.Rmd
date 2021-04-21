@@ -371,7 +371,6 @@ colnames(reg_salary)=c("Estimates")
 kable(reg_salary)
 ```
 
-<<<<<<< HEAD
 ```{r, eval = FALSE}
 a = cemployees %>%
   group_by(employee_id)%>%
