@@ -132,12 +132,20 @@ kable(table)
 ```
 
 ### Phase 2 $\rightarrow$ Phase 3
-Similarly as the previous phase, we are going to check for gender bias from phase 2 to phase 3. See Figure 3 and 4 for comparison of proportion of passing phase 2 by gender and the team they apply to. In this case, we find little difference between employees that apply to data or software team which is different from the previous phase, which may suggest the insignificance of the team variable. But we still start with building model with this variable. Since applicants that are accepted from phase 1 should go through a series of tests online to check their technical skills, writing skills, our model should focus on these variables. \newline
+Similarly as the previous phase, we are going to check for gender bias from phase 2 to phase 3. See Figure 3 and 4 for comparison of proportion of passing phase 2 by gender and the team they apply to. In this case, we find less difference between employees that apply to data or software team than the previous phase, which may indicate the insignificance of this variable. Since applicants that are accepted from phase 1 should go through a series of tests online to check their technical skills, writing skills, we start our model by adding these variables with the predictor variables in the model we built in the previous phase. \newline
 
-Therefore, the outcome variable 
+Therefore, the outcome variable is whether or not the applicant passes phase 2 and for the first model we build, the explanatory variables are GPA, technical skills, writing skills, leadership presence, speaking skills and the team applicants want to join. See the mathematical formula:
 
+$$Y_{i} \sim Bernoulli(p_{i}) $$
+$$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Technical Skills}_{i}+ \beta_3\text{Writing Skills}_{i} + \beta_4 \text{Speaking Skills}+ \beta_5 \text{Leadership Presence}+\\
+\beta_6\text{Team applied for}_i + \beta_7 \text{Work_Experience}_i + \beta_8 \text{Extracurriculars}_i$$
+ 
+See table 2 for the result of model coefficients after exponentiation realized by `glm` function. Notice that among these predictor variables, only skill related ones are significant under level 0.05. Therefore, we would like to remove some insignificant covariates to simplify our model. By removing GPA, working experience, extracurricular and team that the applicants want to join, we come up with the final logistic regression model, written as:
 
+$$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Technical Skills}_{i}+ \beta_3\text{Writing Skills}_{i} + \beta_4 \text{Speaking Skills}+ \beta_5 \text{Leadership Presence}$$
+See table 3 for model results and this is a better model to fit since the AIC of the model drops from 87.527 to 83.574. The result table also suggests fairness between man and women since they are still insignificance with p-value 0.4205 > 0.01.\newline
 
+By conducting logistic regression, we find the algorithm for selecting applicant in phase 2 does not depend much on the significant variables in phase 1 but on the test scores for relevant skills and the selection process is also irrelevent with one's gender.\newline
 
 ```{r}
 ## Phase 2 -> Phase 3
@@ -157,16 +165,12 @@ proptable3 <- joint23 %>% group_by(gender, team_applied_for, pass_phase2) %>% su
 ggplot(proptable3, aes(fill = factor(pass_phase2), y = ratio, x = team_applied_for)) + geom_bar(position = "fill", stat = "identity")+facet_grid(. ~ gender)
 
 ## Build Mixed Logistic regression model to explain whether or not phase 2 is passed
-model2 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + team_applied_for, family = "binomial", data = joint23)
+model2 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + team_applied_for + factor(extracurriculars) + factor(work_experience) , family = "binomial", data = joint23)
 summary(model2)
 
 model3 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
 summary(model3)
 
-model4 <- glm(pass_phase2 ~ gender + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
-summary(model4)
-
-drop_in_dev <- anova(model4, model3, model2, test="Chisq")
 
 ## Calculate CI
 ci2 <- confint(model2)
@@ -176,6 +180,14 @@ table2 <- cbind(round(exp(summary(model2)$coeff[,1]),2),
                round(summary(model2)$coeff[,4],4))
 colnames(table2) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table2)
+
+ci3 <- confint(model3)
+## Print Result of Regression
+table3 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
+               round(exp(ci3), 2),
+               round(summary(model3)$coeff[,4],4))
+colnames(table3) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+kable(table3)
 ```
 
 
@@ -193,10 +205,8 @@ names(proptable4)[3]=("Proportion")
 ggplot(data=proptable4, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") 
 joint3f %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase3), fill = gender))
 
-model5 <- glm(pass_phase_3 ~ gender + interviewer_rating_1:interviewer_rating_2, data = joint3f, family = "binomial")
+model5 <- glm(pass_phase3 ~ gender + interviewer_rating_1:interviewer_rating_2, data = joint3f, family = "binomial")
 summary(model5)
-
-joint3f %>% mutate(mean = mean(interviewer_rating_1, interviewer_rating_2))
 ```
 
 
