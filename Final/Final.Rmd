@@ -46,38 +46,6 @@ The results of the study are summarized below.
 Key results of the study are summarized in the following tables.
 
 
-
-
-
-
-
-
-_Guidelines for the executive summary:_
-
-* _No more than two pages_
-* _Language is appropriate for a non-technical audience_
-* _Bullet points are used where appropriate_
-*	_A small number of key visualizations and/or tables are included_
-*	_All three research questions are addressed_
-
-
-\newpage
-# Technical report
-_This part of the report is much more comprehensive than the executive summary. The audience is statistics/data-minded people, but you should NOT include code or unformatted R output here._
-
-
-## Introduction
-
-### Over the past few months, several companies in software have had bad press on people having complaints about their salaries, applicants having concerns about potenial bias in the hiring process. Chief People Officer | Black Saber Software had hired us and provided us with hiring data for new grad program, and data about promotion and salary for the entire staff. The report is to investigate whether there is potential bias in the hiring and remuneration processes, and to ensure that the company is out ahead of any potential issues.
-
-
-### Research questions
-_Use bullet points to to describe the research questions you are going to address. Write in full sentences._
-
-## Informative title for section addressing a research question
-
-_For each research question, you will want to briefly describe any data manipulation, show some exploratory plots/summary tables, report on any methods you use (i.e. models you fit) and the conclusions you draw from these_
-
 ```{r, include = FALSE, echo = FALSE}
 library(tidyverse)
 library(lme4)
@@ -118,6 +86,38 @@ joint3f <- joint23 %>% filter(is.na(interviewer_rating_1)==FALSE) %>% left_join(
 joint3f$pass_phase3[is.na(joint3f$pass_phase3)] <- 0 
 ```
 
+```{r}
+joint12_filter <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))%>% filter(gender !='Prefer not to say')
+proptable0 <- table(factor(joint12_filter$gender), factor(joint12_filter$pass_phase1))
+proptable0 <- as.data.frame(prop.table(proptable0, 1))
+names(proptable0)[1]=('Gender')
+names(proptable0)[2]=('Pass')
+names(proptable0)[3]=("Proportion")
+ggplot(data=proptable0, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") + labs(title = 'Round 1')
+
+
+joint23 <- phase2 %>% left_join(phase3, by = "applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))%>% filter(gender !='Prefer not to say')
+proptable2 <- table(factor(joint23$gender), factor(joint23$pass_phase2))
+proptable2 <- as.data.frame(prop.table(proptable2, 1))
+names(proptable2)[1]=('Gender')
+names(proptable2)[2]=('Pass')
+names(proptable2)[3]=("Proportion")
+ggplot(data=proptable2, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") + labs(title = 'Round 2')
+
+
+
+final_hire <- final_hire %>% mutate(pass_phase3 = 1)
+joint3f <- joint23 %>% filter(is.na(interviewer_rating_1)==FALSE) %>% left_join(final_hire, by = "applicant_id")
+joint3f$pass_phase3[is.na(joint3f$pass_phase3)] <- 0 
+
+
+proptable3 <- table(factor(joint3f$gender), factor(joint3f$pass_phase3))
+proptable3 <- as.data.frame(prop.table(proptable3, 1))
+names(proptable3)[1]=('Gender')
+names(proptable3)[2]=('Pass')
+names(proptable3)[3]=("Proportion")
+ggplot(data=proptable3, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") + labs(title = 'Round 3')
+```
 
 ```{r, echo = FALSE}
 ## Summary Table I: Current employee by department and gender in the fourth quarter of 2020
@@ -166,6 +166,20 @@ t2 <- t2 %>% mutate(man_per = prom_ratio_man/(prom_ratio_man + prom_ratio_woman)
 t2 %>% ggplot(aes(x = financial_q,  y = man_per, group = 1)) + geom_line()+geom_hline(yintercept = 0.5, linetype = "dashed", color = "red")+theme(axis.text.x = element_text(angle = 45))
 
 ```
+
+\newpage
+# Technical report
+## Introduction
+
+### Over the past few months, several companies in software have had bad press on people having complaints about their salaries, applicants having concerns about potenial bias in the hiring process. Chief People Officer | Black Saber Software had hired us and provided us with hiring data for new grad program, and data about promotion and salary for the entire staff. The report is to investigate whether there is potential bias in the hiring and remuneration processes, and to ensure that the company is out ahead of any potential issues.
+
+
+### Research questions
+*_ 
+*_
+## Informative title for section addressing a research question
+
+
 
 
 ## Research Question 1: Is gender bias involved in the process of three-phases recruitment?
@@ -351,8 +365,6 @@ new_cemployees %>%
   ggtitle(label="Salary by role seniority and gender setting") +
   theme(legend.position = "right")
 ```
-
-
 
 ```{r}
 b = cemployees %>%
