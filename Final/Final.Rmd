@@ -134,25 +134,6 @@ summary(model2)
 
 ```{r}
 #chunk new created by Peter
-<<<<<<< HEAD
-<<<<<<< HEAD
-black_saber_current_employees %>%
-  filter(gender != "Prefer not to say")%>%
-  group_by(employee_id)%>%
-  ggplot(aes(x = role_seniority, y = salary, color = gender))+
-  geom_boxplot()+
-  theme_minimal() +
-  scale_colour_brewer(palette = "Dark2")+
-  theme(legend.position = "right")
-=======
-cemployees %>% 
-  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]"))
-reg_salary = lmer(salary~productivity+(1|role_seniority), data =cemployees)
-
-
-
->>>>>>> 0fe80ac6c83d44c2142886a8a0f90bfcf3fb0295
-=======
 new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
   mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))%>%
@@ -190,7 +171,6 @@ new_cemployees %>%
   scale_fill_brewer(palette = "Dark2")+
   theme(legend.position = "right")+
   theme_minimal()
->>>>>>> 9847f66853a706e2d232f6e49a33ba15700e398f
 ```
 ## Discussion
 
