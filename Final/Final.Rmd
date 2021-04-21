@@ -134,26 +134,46 @@ ggplot(data=proptable2, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat=
 proptable3 <- joint23 %>% group_by(gender, team_applied_for, pass_phase2) %>% summarize(number = n()) %>% group_by(gender, team_applied_for) %>% summarize(pass_phase2 = pass_phase2, ratio = number/sum(number))
 ggplot(proptable3, aes(fill = factor(pass_phase2), y = ratio, x = team_applied_for)) + geom_bar(position = "fill", stat = "identity")+facet_grid(. ~ gender)
 
-## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
-model2 <- glmer(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + (1|team_applied_for), family = "binomial", data = joint23)
+## Build Mixed Logistic regression model to explain whether or not phase 2 is passed
+model2 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + team_applied_for, family = "binomial", data = joint23)
 summary(model2)
 
-model3 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + team_applied_for, family = "binomial", data = joint23)
+model3 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
 summary(model3)
 
-model4 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
+model4 <- glm(pass_phase2 ~ gender + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
 summary(model4)
 
+drop_in_dev <- anova(model4, model3, model2, test="Chisq")
+
 ## Calculate CI
-ci2 <- confint(model3)
+ci2 <- confint(model2)
 ## Print Result of Regression
-table2 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
+table2 <- cbind(round(exp(summary(model2)$coeff[,1]),2),
                round(exp(ci2[-1, ]), 2),
-               round(summary(model3)$coeff[,4],4))
+               round(summary(model2)$coeff[,4],4))
 colnames(table2) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table2)
 ```
 
+```{r}
+## Phase 3 -> Final Result
+final_hire <- final_hire %>% mutate(pass_phase3 = 1)
+joint3f <- joint23 %>% filter(is.na(interviewer_rating_1)==FALSE) %>% left_join(final_hire, by = "applicant_id")
+joint3f$pass_phase3[is.na(joint3f$pass_phase3)] <- 0 
+
+proptable4 <- table(factor(joint3f$gender), factor(joint3f$pass_phase3))
+proptable4 <- as.data.frame(prop.table(proptable4, 1))
+names(proptable4)[1]=('Gender')
+names(proptable4)[2]=('Pass')
+names(proptable4)[3]=("Proportion")
+ggplot(data=proptable4, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") 
+joint3f %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase3), fill = gender))
+
+model5 <- glm(pass_phase_3 ~ gender + interviewer_rating_1:interviewer_rating_2, data = joint3f, family = "binomial")
+summary(model5)
+
+```
 
 
 ```{r}
