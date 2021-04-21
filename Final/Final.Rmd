@@ -92,6 +92,7 @@ library(kableExtra)
 ```
 
 ```{r}
+## Phase 1 -> Phase 2
 ## Join Phase 1 and Phase 2, create variable pass_phase1
 joint12 <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))
 
@@ -101,18 +102,21 @@ table(factor(joint12$gender), factor(joint12$pass_phase1))
 ## Visualize Contingency Table
 joint12 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase1), fill = gender))
 
-## Build Logistic regression model to explain whether or not phase 1 is passed
+## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
 joint12$team_applied_for <- as.factor(joint12$team_applied_for)
 model1 <- glmer(pass_phase1 ~ gpa + extracurriculars + work_experience + gender
                 + (1|team_applied_for), family = "binomial", data = joint12)
-
-summary(model1)
+## Calculate CI
 ci <- confint(model1)
+## Print Result of Regression
 table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
                round(exp(ci[-1, ]), 2),
                round(summary(model1)$coeff[,4],4))
 colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table)
+```
+```{r}
+## Phase 2 -> Phase 3
 
 ```
 
