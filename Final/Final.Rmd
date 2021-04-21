@@ -310,38 +310,10 @@ kable(table5)
 ```
 
 ## Research Question 2: Is there any gender bias in the remuneration processes?
-Black Saber Software provides us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use to is creating a boxplot of salary conditions on role seniority and gender setting, and then applying different types of regression models to see which one best serve our purpose. 
-Boxplot:
-```{r}
-#chunk new created by Peter
-## check if salary are fair in gender(gender)
-new_cemployees =  cemployees%>%
-  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
-  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
-#create a histogram of salary condition on role seniority
-new_cemployees %>%
-  ggplot(aes(x = salary)) +
-  stat_bin(bins = 50)+
-  geom_histogram() +
-  facet_wrap(~role_seniority, nrow = 3) +
-  ggtitle(label="Histogram of salary condition on role seniority") +
-  theme_bw() +
-  theme(legend.position = "right")
-new_cemployees = new_cemployees%>%
-  filter(Gender!="Prefer not to say")%>%
-  mutate(role_seniority = fct_relevel(role_seniority, "Director", after = 7))
-new_cemployees = new_cemployees%>%
-  mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 6))
+Black Saber Software provides us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use to is creating a boxplot of salary conditions on role seniority and gender setting(see Figure.1 below), and then applying different types of regression models to see which one best serve our purpose. 
 
-#create a boxplot
-new_cemployees %>%
-  ggplot(aes(x = role_seniority,
-             y = salary,
-             color=Gender)) +
-  geom_boxplot() +
-  theme_minimal() +
-  ggtitle(label="Salary by role seniority and gender setting") +
-  theme(legend.position = "right")
+```{r}
+
 ```  
 
 
@@ -349,9 +321,21 @@ new_cemployees %>%
 
 From the graph, we can see that women have lower salaries across different role seniority.
 
-In order to test whether gender bias truely exists, we need to first find the most appropriate model. We create a simple linear regression model: $salary = \beta_0+\beta_1*Productivity+\beta_2*Gender$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we add the variable "team"(job in the company) as the random intercept in previous model to create a new linear mixed model. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram. For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better.
+In order to test whether gender bias truely exists, we need to first find the most appropriate model. We create a simple linear regression model: $salary = \beta_0+\beta_1*Productivity+\beta_2*Gender$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we add the variable "team"(job in the company) as the random intercept in previous model to create a new linear mixed model. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram(see Figure.2 below). For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better.
 Thus, based on interpretation of our final model, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#chunk new created by Peter
+## check if salary are fair in gender(gender)
+new_cemployees =  cemployees%>%
+  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
+  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
 
+new_cemployees = new_cemployees%>%
+  filter(Gender!="Prefer not to say")%>%
+  mutate(role_seniority = fct_relevel(role_seniority, "Director", after = 7))
+new_cemployees = new_cemployees%>%
+  mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 6))
+```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 reg_salary_1 = lm(salary~productivity+Gender, data =new_cemployees)
@@ -364,6 +348,24 @@ lmtest::lrtest(reg_salary_2, reg_salary_3)#check if role seniority as random int
 ```
 
 ```{r echo=FALSE,message=FALSE, warning=FALSE}
+#create a boxplot
+new_cemployees %>%
+  ggplot(aes(x = role_seniority,
+             y = salary,
+             color=Gender)) +
+  geom_boxplot() +
+  theme_minimal() +
+  ggtitle(label="Figure.1: Salary by role seniority and gender setting") +
+  theme(legend.position = "right")
+#create a histogram of salary condition on role seniority
+new_cemployees %>%
+  ggplot(aes(x = salary)) +
+  stat_bin(bins = 50)+
+  geom_histogram() +
+  facet_wrap(~role_seniority, nrow = 3) +
+  ggtitle(label="Figure.2: Histogram of salary condition on role seniority") +
+  theme_bw() +
+  theme(legend.position = "right")
 ## Print Result of Regression
 reg_salary <- cbind(round(summary(reg_salary_3)$coeff[,1],2))
 rownames(reg_salary) <- c("Intecept","Productivity","Gender: Women")
