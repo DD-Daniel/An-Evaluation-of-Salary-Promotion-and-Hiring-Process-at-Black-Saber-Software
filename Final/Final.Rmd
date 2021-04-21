@@ -165,14 +165,21 @@ new_cemployees =  cemployees%>%
 
 reg_salary_1 = lm(salary~productivity, data =new_cemployees)
 reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
-summary(reg_salary_1)
+lmtest::lrtest(reg_salary_1, reg_salary_2)#check if role seniority as random intercept(baseline) is more significant
 
 reg_salary_3 = lmer(salary~productivity+(1|role_seniority)+(1|financial_q), data =new_cemployees)
-reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1|gender), data =new_cemployees)
+lmtest::lrtest(reg_salary_2, reg_salary_3) #check if financial quarter as random intercept is more significant
 
-lmtest::lrtest(reg_salary_2, reg_salary_3)
+reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1+productivity|financial_q), data =new_cemployees)
 lmtest::lrtest(reg_salary_2, reg_salary_4)
-#has gender bias
+#check if check if financial quarter as random intercept and random slope are more significant
+#productivity are affect by financial quarter(significant)
+
+reg_salary_5 = lmer(salary~productivity+(1|role_seniority)+(1+productivity|financial_q)+(1|gender), 
+                    data =new_cemployees) #final model
+lmtest::lrtest(reg_salary_4, reg_salary_5) 
+#check if gender as random intercept is significant
+#conclusion: has gender bias
 
 #create a boxplot
 new_cemployees %>%
@@ -185,16 +192,6 @@ new_cemployees %>%
   ggtitle(label="Salary by role seniority and gender setting") +
   theme_bw() +
   theme(legend.position = "right")
-
-new_cemployees %>% 
-  ggplot(aes(y = salary, x = productivity,color = gender)) +
-  geom_point()+
-  geom_line(stat="smooth", method = "lm", formula = 'y~x') +
-  facet_grid(~role_seniority) +
-  scale_x_continuous(breaks = seq(2,12, by = 4)) +
-  scale_fill_brewer(palette = "Dark2")+
-  theme(legend.position = "right")+
-  theme_minimal()
 ```
 ## Discussion
 
