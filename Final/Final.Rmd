@@ -90,16 +90,32 @@ install.packages("kableExtra")
 library(kableExtra)
 ```
 
+## Research Question 1: Is gender bias involved in the process of three-phases recruitment?
+
+It is known that the recruitment process in Black Saber Software Company consists of three phases, so our examination of fairness of the hiring process will be focusing on analyzing hiring data in each phase respectively. By using the provided data sets containing information for applicants, we can construct statistical model (Logistics Regression in this report) using gender and other covariates to explain the probability of a given applicant being selected in each phase. Whether of not gender bias exists can be checked by its significance in the model we construct. This is the general methodology that we use to resolve this question. We will now go through the detailed process of model constructing for each phase as follows.
+
+### Phase 1 $\rightarrow$ Phase 2
+We start by left joining applicants data in phase 2 into phase 1 by using function `left_join` in the `tidyverse` package in R with applicant ID and add binary variable `pass_phase1` to indicate whether the applicant is selected to the next phase. \newline
+
+In order to build model, some exploratory data analysis is performed as follows. Note that Figure 1 is the visualization for the contingency table that represents the proportion of applicants in each gender that are selected to the next phase. It can be seen that the proportion of men and women that are selected to the next phase is roughly the same. Out of those who apply for data team, `r 132/(124+132)` are selected and out of those who apply for software tea,`168/(168+189)` applicants are selected to move on. Figure 2 compares the proportion of applicants who are selected by their gender and the team they apply to work with. The plot suggests that for each gender group, their is a slightly higher proportion of acceptance if the applicant is willing to work in the data team compared to the software team. Therefore, a term for the team that applicants want to apply for will be considered in our model and it actually serves as the random effect in our model. It is also worth noting that no obvious difference can be observed between men and women group, which also agree with our previous plot. \newline
+
+We start by building the logistic mixed effect model written as follows:
+$$\log(\frac{p}{1-p}) = $$
+
 ```{r}
 ## Phase 1 -> Phase 2
 ## Join Phase 1 and Phase 2, create variable pass_phase1
 joint12 <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))
 
 ## Draw Contingency Table
-table(factor(joint12$gender), factor(joint12$pass_phase1))
+table(factor(joint12$team_applied_for), factor(joint12$pass_phase1))
 
 ## Visualize Contingency Table
 joint12 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase1), fill = gender))
+
+proptable5 <- joint12 %>% group_by(gender, team_applied_for, pass_phase1) %>% summarize(number = n()) %>% group_by(gender, team_applied_for) %>% summarize(pass_phase1 = pass_phase1, ratio = number/sum(number))
+ggplot(proptable5, aes(fill = factor(pass_phase1), y = ratio, x = team_applied_for)) + geom_bar(position = "fill", stat = "identity")+facet_grid(. ~ gender)
+
 
 ## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
 joint12$team_applied_for <- as.factor(joint12$team_applied_for)
@@ -172,6 +188,7 @@ joint3f %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase3), fill = 
 model5 <- glm(pass_phase_3 ~ gender + interviewer_rating_1:interviewer_rating_2, data = joint3f, family = "binomial")
 summary(model5)
 
+joint3f %>% mutate(mean = mean(interviewer_rating_1, interviewer_rating_2))
 ```
 
 <<<<<<< HEAD
