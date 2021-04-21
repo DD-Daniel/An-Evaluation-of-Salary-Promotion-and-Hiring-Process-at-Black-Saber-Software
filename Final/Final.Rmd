@@ -96,11 +96,17 @@ We start by left joining applicants data in phase 2 into phase 1 by using functi
 
 In order to build model, some exploratory data analysis is performed as follows. Note that Figure 1 is the visualization for the contingency table that represents the proportion of applicants in each gender that are selected to the next phase. It can be seen that the proportion of men and women that are selected to the next phase is roughly the same. Out of those who apply for data team, `r 132/(124+132)` are selected and out of those who apply for software tea,`168/(168+189)` applicants are selected to move on. Figure 2 compares the proportion of applicants who are selected by their gender and the team they apply to work with. The plot suggests that for each gender group, their is a slightly higher proportion of acceptance if the applicant is willing to work in the data team compared to the software team. Therefore, a term for the team that applicants want to apply for will be considered in our model and it actually serves as the random effect in our model. It is also worth noting that no obvious difference can be observed between men and women group, which also agree with our previous plot. \newline
 
-We start by building the logistic mixed effect model written as follows:
+Our outcome of interest is whether the applicant passes phase 1, and our predictors are GPA, work experience, extracurricular. As we observe similar pattern for individual in one team, a generalized linear mixed model with logit link was used and random intercepts were estimated by the team that each applicant desire to work with.\newline
+
+The model can be written as:
 $$Y_{ij} \sim Bernoulli(p_{ij}) $$
-$$\log(\frac{p_{ij}}{1-p_{ij}}) = \mu + GPA_{ij}\beta_1 + \text{Extracurricular}_{ij}\beta_2+ \text{Work Experience}_{ij} \beta_3+ U_i$$
-$$U_i \sim N(0, \sigma^2)$$
-where $Y_{ij}$ is the acceptance of applicant $i$ in application group $j$, X_{ij} is the 
+$$\log(\frac{p_{ij}}{1-p_{ij}}) = \mu + \beta_1 GPA_{ij} + \beta_2\text{Extracurricular}_{ij}+ \beta_3\text{Work Experience}_{ij} + T_i$$
+$$T_i \sim N(0, \sigma^2)$$
+where $Y_{ij}$ is the acceptance of applicant $i$ in application group $j$, X_{ij} are fixed effects and $T_i$ is random effect of applicants' desired team, which follows normal distribution.\newline
+
+The model is realized in R through the `glmer` function in the `lme4` package. Result is shown in table 1. Not surprisingly, we find that GPA and work experiences are all significant at level 0.05. 1 unit increase of GPA is associated with 
+
+
 ```{r}
 ## Phase 1 -> Phase 2
 ## Join Phase 1 and Phase 2, create variable pass_phase1
@@ -128,6 +134,7 @@ table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
                round(exp(ci[-1, ]), 2),
                round(summary(model1)$coeff[,4],4))
 colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table) <- c("Baseline Odds", "GPA", "Extracurriculas", "Work Experience", "Gender: Prefer Not to say", "Gender: Woman")
 kable(table)
 ```
 
