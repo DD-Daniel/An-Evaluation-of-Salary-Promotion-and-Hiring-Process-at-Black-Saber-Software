@@ -100,7 +100,7 @@ $$Y_{i} \sim Bernoulli(p_{i}) $$
 $$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Extracurricular}_{i}+ \beta_3\text{Work Experience}_{i} + \beta_4 \text{Team applied for}_i$$
 where $Y_{i}$ is the acceptance of applicant $i$ , X_{i}s are explanatory variables.\newline
 
-The model is realized in R through the `glm` function. Result is shown in table 1. Not surprisingly, we find that GPA and work experiences are all significant at level 0.05. 1 unit increase of GPA is associated with the odds of being admitted increasing by 621%. Similarly, obtaining level 1 working experience will increase the odds of passing phase in by 335%. Most importantly, variable "gender: women" is highly insignificant with p-value 0.8576, which supports the nonexistence of gender bias in the first phase of hiring. Similar thing for the category where applicants are not willing to tell their gender.
+The model is realized in R through the `glm` function. Result is shown in table 1. Not surprisingly, we find that GPA and work experiences are all significant at level 0.05. Most importantly, variable "gender: women" is highly insignificant with p-value 0.8576, which supports the nonexistence of gender bias in the first phase of hiring. Similar thing for the category where applicants are not willing to tell their gender.
 ```{r}
 ## Phase 1 -> Phase 2
 ## Join Phase 1 and Phase 2, create variable pass_phase1
@@ -145,7 +145,7 @@ See table 2 for the result of model coefficients after exponentiation realized b
 $$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Technical Skills}_{i}+ \beta_3\text{Writing Skills}_{i} + \beta_4 \text{Speaking Skills}+ \beta_5 \text{Leadership Presence}$$
 See table 3 for model results and this is a better model to fit since the AIC of the model drops from 87.527 to 83.574. The result table also suggests fairness between man and women since they are still insignificance with p-value 0.4205 > 0.01.\newline
 
-By conducting logistic regression, we find the algorithm for selecting applicant in phase 2 does not depend much on the significant variables in phase 1 but on the test scores for relevant skills and the selection process is also irrelevent with one's gender.\newline
+By conducting logistic regression, we find the algorithm for selecting applicant in phase 2 does not depend much on the significant variables in phase 1 but on the test scores for relevant skills and the selection process is also irrelevant with one's gender.\newline
 
 ```{r}
 ## Phase 2 -> Phase 3
@@ -189,7 +189,8 @@ table3 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
 colnames(table3) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table3)
 ```
-
+### Phase 3 to Final Result
+The methodology we use to deal with this phase is different from the first two phases. Since being listed as ‘first’ or ‘second’ interviewer is arbitrary, we create a new variable "sum" that is the sum of ratings by two interviewers.
 
 ```{r}
 ## Phase 3 -> Final Result
@@ -197,18 +198,20 @@ final_hire <- final_hire %>% mutate(pass_phase3 = 1)
 joint3f <- joint23 %>% filter(is.na(interviewer_rating_1)==FALSE) %>% left_join(final_hire, by = "applicant_id")
 joint3f$pass_phase3[is.na(joint3f$pass_phase3)] <- 0 
 
-proptable4 <- table(factor(joint3f$gender), factor(joint3f$pass_phase3))
-proptable4 <- as.data.frame(prop.table(proptable4, 1))
-names(proptable4)[1]=('Gender')
-names(proptable4)[2]=('Pass')
-names(proptable4)[3]=("Proportion")
-ggplot(data=proptable4, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") 
 joint3f %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase3), fill = gender))
 
-model5 <- glm(pass_phase3 ~ gender + interviewer_rating_1:interviewer_rating_2, data = joint3f, family = "binomial")
+
+joint_3f <- joint3f %>% mutate(sum = interviewer_rating_1+interviewer_rating_2)
+
+sort(joint_3f[
+  order(- joint_3f[,17] ),
+][1:10, ]$applicant_id)
+
+sort(final_hire$applicant_id)
+
+model5 <- lm(sum ~ technical_skills + writing_skills + leadership_presence + speaking_skills + gender, data = joint_3f)
 summary(model5)
 ```
-
 
 ## Research Question 2: Is there any gender bias in the remuneration processes?
 Black Saber Software provide us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use to is creating a boxplot of salary conditions on role seniority and gender setting, and then applying different types of regression models to see which one best serve our purpose. 
@@ -287,6 +290,8 @@ colnames(b)[3] ="time_since_promotion"
 ## Discussion
 
 _In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
+
+1 unit increase of GPA is associated with the odds of being admitted increasing by 621%. Similarly, obtaining level 1 working experience will increase the odds of passing phase in by 335%.
 
 ### Strengths and limitations
 
