@@ -279,6 +279,7 @@ table3 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
                round(exp(ci3), 2),
                round(summary(model3)$coeff[,4],4))
 colnames(table3) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table3) <- c("Intercept", "Gender: Woman", "GPA", "Technical Skills", "Writing Skills", "Leadship Presence", "Speaking Skills")
 kable(table3)
 ```
 
@@ -308,6 +309,7 @@ table5 <- cbind(round(exp(summary(model5)$coeff[,1]),2),
                round(exp(ci5), 2),
                round(summary(model5)$coeff[,4],4))
 colnames(table5) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table5) <- c("Intercept", "Technical Skills", "Writing Skills", "Leadership Presence", "Speaking Skills", "Gender: Woman")
 kable(table5)
 
 ```
@@ -327,7 +329,8 @@ $$ $$
 Based on interpretation, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
 
 
-```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE, eval = FALSE}
+```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE,fig.show = "hold", out.width = "50%"}
+library(lmtest)
 #chunk new created by Peter
 ## check if salary are fair in gender(gender)
 new_cemployees =  cemployees%>%
