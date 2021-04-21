@@ -70,16 +70,12 @@ my_plot <- cemployees %>%
   theme_minimal() +
   labs(title = "Look! A title. But do you want a title or a caption for your report?", x = "This is a changed x label")
 # save your plot in your images folder, you can specify the height and width, too
-# saving this means you can add the image to your exectuve summary without having to run or rerun the code, if you wish
+# saving this means you can add the image to your exectutive summary without having to run or rerun the code, if you wish
 ggsave("images/example.png", width = 7, height = 4)
 
 # norice how the image is included with the ![](file/path.png) below
 ```
 
-![](images/example.png)
-z
-## Informative title for section addressing a research question
-## Informative title for section addressing a research question
 
 ```{r, include = FALSE}
 library(tidyverse)
@@ -100,8 +96,16 @@ We start by left joining applicants data in phase 2 into phase 1 by using functi
 
 In order to build model, some exploratory data analysis is performed as follows. Note that Figure 1 is the visualization for the contingency table that represents the proportion of applicants in each gender that are selected to the next phase. It can be seen that the proportion of men and women that are selected to the next phase is roughly the same. Out of those who apply for data team, `r 132/(124+132)` are selected and out of those who apply for software tea,`168/(168+189)` applicants are selected to move on. Figure 2 compares the proportion of applicants who are selected by their gender and the team they apply to work with. The plot suggests that for each gender group, their is a slightly higher proportion of acceptance if the applicant is willing to work in the data team compared to the software team. Therefore, a term for the team that applicants want to apply for will be considered in our model and it actually serves as the random effect in our model. It is also worth noting that no obvious difference can be observed between men and women group, which also agree with our previous plot. \newline
 
-We start by building the logistic mixed effect model written as follows:
-$$\log(\frac{p}{1-p}) = $$
+Our outcome of interest is whether the applicant passes phase 1, and our predictors are GPA, work experience, extracurricular. As we observe similar pattern for individual in one team, a generalized linear mixed model with logit link was used and random intercepts were estimated by the team that each applicant desire to work with.\newline
+
+The model can be written as:
+$$Y_{ij} \sim Bernoulli(p_{ij}) $$
+$$\log(\frac{p_{ij}}{1-p_{ij}}) = \mu + \beta_1 GPA_{ij} + \beta_2\text{Extracurricular}_{ij}+ \beta_3\text{Work Experience}_{ij} + T_i$$
+$$T_i \sim N(0, \sigma^2)$$
+where $Y_{ij}$ is the acceptance of applicant $i$ in application group $j$, X_{ij} are fixed effects and $T_i$ is random effect of applicants' desired team, which follows normal distribution.\newline
+
+The model is realized in R through the `glmer` function in the `lme4` package. Result is shown in table 1. Not surprisingly, we find that GPA and work experiences are all significant at level 0.05. 1 unit increase of GPA is associated with 
+
 
 
 
@@ -150,6 +154,7 @@ table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
                round(exp(ci[-1, ]), 2),
                round(summary(model1)$coeff[,4],4))
 colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table) <- c("Baseline Odds", "GPA", "Extracurriculas", "Work Experience", "Gender: Prefer Not to say", "Gender: Woman")
 kable(table)
 ```
 
@@ -219,7 +224,6 @@ new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
   mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
 
-
 #create a histogram of salary condition on role seniority
 new_cemployees %>%
   ggplot(aes(x = salary)) +
@@ -236,23 +240,24 @@ new_cemployees = new_cemployees%>%
 new_cemployees = new_cemployees%>%
   mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 6))
 
-reg_salary_1 = lm(salary~productivity, data =new_cemployees)
-reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
-lmtest::lrtest(reg_salary_1, reg_salary_2)#check if role seniority as random intercept(baseline) is more significant
+reg_salary_1 = lm(salary~productivity+gender, data =new_cemployees)
+reg_salary_2 = lmer(salary~productivity+gender+(1|team), data =new_cemployees)
+#lmtest::lrtest(reg_salary_1, reg_salary_2) #check if adding team as random intercept is more significant
 
-reg_salary_3 = lmer(salary~productivity+(1|role_seniority)+(1|financial_q), data =new_cemployees)
-lmtest::lrtest(reg_salary_2, reg_salary_3) #check if financial quarter as random intercept is more significant
+reg_salary_2a = lmer(salary~productivity+gender+(1+productivity|team), data =new_cemployees)
+#lmtest::lrtest(reg_salary_2, reg_salary_2a) #check if there productivity are different for different team
 
-reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1+productivity|financial_q), data =new_cemployees)
-lmtest::lrtest(reg_salary_2, reg_salary_4)
-#check if check if financial quarter as random intercept and random slope are more significant
-#productivity are affect by financial quarter(significant)
+reg_salary_3 = lmer(salary~productivity+gender+(1|team)+(1|role_seniority), data =new_cemployees)
+lmtest::lrtest(reg_salary_2, reg_salary_3)#check if role seniority as random intercept(baseline) is more significant
 
-reg_salary_5 = lmer(salary~productivity+(1|role_seniority)+(1+productivity|financial_q)+(1|gender), 
-                    data =new_cemployees) #final model
-lmtest::lrtest(reg_salary_4, reg_salary_5) 
-#check if gender as random intercept is significant
-#conclusion: has gender bias
+
+## Calculate CI
+ci2 <- confint(reg_salary_3)
+## Print Result of Regression
+reg_salary <- cbind(round(summary(reg_salary_3)$coeff[,1],2))
+rownames(reg_salary) <- c("Intecept","Productivity","GenderWomen")
+colnames(reg_salary)=c("Estimates")
+kable(reg_salary)
 
 #create a boxplot
 new_cemployees %>%
