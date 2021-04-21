@@ -68,7 +68,6 @@ my_plot <- cemployees %>%
   geom_histogram(colour = "grey", fill = "#6C3082") +
   theme_minimal() +
   labs(title = "Look! A title. But do you want a title or a caption for your report?", x = "This is a changed x label")
-
 # save your plot in your images folder, you can specify the height and width, too
 # saving this means you can add the image to your exectuve summary without having to run or rerun the code, if you wish
 ggsave("images/example.png", width = 7, height = 4)
@@ -175,13 +174,34 @@ summary(model5)
 
 ```
 
+<<<<<<< HEAD
+```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+=======
 
 ```{r}
+>>>>>>> e33e85a31932db4d30a3a2251819f946e949ed75
 #chunk new created by Peter
+## check if salary are fair in gender(gender)
 new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
-  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))%>%
-  filter(gender!="Prefer not to say")
+  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
+
+
+#create a histogram of salary condition on role seniority
+new_cemployees %>%
+  ggplot(aes(x = salary)) +
+  stat_bin(bins = 50)+
+  geom_histogram() +
+  facet_wrap(~role_seniority, nrow = 3) +
+  ggtitle(label="Histogram of salary condition on role seniority") +
+  theme_bw() +
+  theme(legend.position = "right")
+
+new_cemployees = new_cemployees%>%
+  filter(gender!="Prefer not to say")%>%
+  mutate(role_seniority = fct_relevel(role_seniority, "Director", after = 7))
+new_cemployees = new_cemployees%>%
+  mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 6))
 
 reg_salary_1 = lm(salary~productivity, data =new_cemployees)
 reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
@@ -203,14 +223,12 @@ lmtest::lrtest(reg_salary_4, reg_salary_5)
 
 #create a boxplot
 new_cemployees %>%
-  ggplot(aes(x = gender,
+  ggplot(aes(x = role_seniority,
              y = salary,
-             color=role_seniority)) +
+             color=gender)) +
   geom_boxplot() +
-  geom_point() +
-  facet_wrap(~role_seniority, nrow = 2) +
+  theme_minimal() +
   ggtitle(label="Salary by role seniority and gender setting") +
-  theme_bw() +
   theme(legend.position = "right")
 ```
 ## Discussion
