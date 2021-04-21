@@ -29,18 +29,15 @@ options(scipen = 999)
 
 Over the past few months, several software companies had received bad press about their hiring and remuneration processes, during which human bias are present. As a consequence, people have been raising concerns about potential bias in the recruitment and promotion process of Black Saber Software. Experts in our advisory and consulting group are hired to ensure the client company is out ahead of any potential such issues. This study following set out to assess whether the client company exhibits a bias against female in hiring, as well as 2013-2020 salary and promotion.
 
-The results of the study are summarized below.
+The results are summarized below.
 
 *The gender bias are not present in the first two rounds of the hiring process. Females and males have equal opportunities to be selected in both the first round and the second round of the recruiting. Neither men nor women are more favorable.
 
-*In the Phase I of the recruitment process, individuals who have higher GPA or those who have demonstrated some work experience in the past are more possible to be automatically selected by the AI to the next round. However, surprisingly, young professionals who have rich extracurricular experiences do not seem to have a notifiable advantage in the first round of the hiring. 
+*In the Phase I of the recruitment process, individuals who have higher GPA or those who have demonstrated some work experience in the past are more likely to be automatically selected by the AI to the next round. However, surprisingly, young professionals who have rich extracurricular experiences do not seem to have a notifiable advantage in the first round of the hiring. 
 
-*Only individuals who has provided sufficient material to the company, that is, only those who uploaded both CV and the cover letter are likely to pass the phase I recruiting process.
+*In the Phase II of the hiring, GPA and work experience are no longer a factor that will have an effect on the selection process. Instead, the evaluation of individuals focus on technical skills as well as other soft skills such as writing skills, speaking skills and leadership skills.
 
-*In the Phase II of the hiring, GPA and work experience are no longer a factor that will have an effect on the selection process. Instead, the evaluation of individuals focus on  technical skills as well as other soft skills such as writing skills, speaking skills and leadership skills.
-
-*Overall, current male employees have higher salary compared to their female counterparts who has the same role seniority under the same department. Female employees are not well-paid even if they have the same amount of workloads as male employees.
-
+*Overall, current male employees have higher salary compared to their female counterparts who have the same role seniority under the same department. Female employees are not paid with the same amount salaries even if they have the same amount of workloads as male employees.
 
 *
 
@@ -118,6 +115,8 @@ names(proptable3)[1]=('Gender')
 names(proptable3)[2]=('Pass')
 names(proptable3)[3]=("Proportion")
 ggplot(data=proptable3, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") + labs(title = 'Round 3')
+
+
 ```
 
 ```{r, echo = FALSE}
@@ -177,12 +176,8 @@ t2 %>% ggplot(aes(x = financial_q,  y = man_per, group = 1)) + geom_line()+geom_
 ### Research questions
 *_ 
 *_
-## Informative title for section addressing a research question
 
-
-
-
-## Research Question 1: Is gender bias involved in the process of three-phases recruitment?
+## Research Question 1: Is there any gender bias in the process of three-phases recruitment?
 
 It is known that the recruitment process in Black Saber Software Company consists of three phases, so our examination of fairness of the hiring process will be focusing on analyzing hiring data in each phase respectively. By using the provided data sets containing information for applicants, we can construct statistical model (Logistics Regression in this report) using gender and other covariates to explain the probability of a given applicant being selected in each phase. Whether of not gender bias exists can be checked by its significance in the model we construct. This is the general methodology that we use to resolve this question. We will now go through the detailed process of model constructing for each phase as follows.
 
@@ -279,6 +274,7 @@ table3 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
                round(exp(ci3), 2),
                round(summary(model3)$coeff[,4],4))
 colnames(table3) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table3) <- c("Intercept", "Gender: Woman", "GPA", "Technical Skills", "Writing Skills", "Leadship Presence", "Speaking Skills")
 kable(table3)
 ```
 
@@ -308,6 +304,7 @@ table5 <- cbind(round(exp(summary(model5)$coeff[,1]),2),
                round(exp(ci5), 2),
                round(summary(model5)$coeff[,4],4))
 colnames(table5) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table5) <- c("Intercept", "Technical Skills", "Writing Skills", "Leadership Presence", "Speaking Skills", "Gender: Woman")
 kable(table5)
 
 ```
@@ -327,7 +324,7 @@ $$ $$
 Based on interpretation, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
 
 
-```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE, eval = FALSE}
+```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 #chunk new created by Peter
 ## check if salary are fair in gender(gender)
 new_cemployees =  cemployees%>%
@@ -372,8 +369,13 @@ new_cemployees %>%
   theme(legend.position = "right")
 ```
 
+<<<<<<< HEAD
 ```{r, eval = FALSE}
 a = cemployees %>%
+=======
+```{r}
+b = cemployees %>%
+>>>>>>> c2aea3f555fd1d7b97c628fb9d273f5d7d77923e
   group_by(employee_id)%>%
   count(role_seniority)
 
@@ -396,14 +398,19 @@ role
 ```
 
 ## Discussion
-_In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
+For our research question 1: Is there any gender bias in the process of three-phases recruitment? We do not find any gender bias throughout the entire hiring process(AI and In-Person Interview). The limitation to this research question is that only a small amount of people pass each hiring phase, we do not have many data to investigate gender bias. Also, after applying several models, we find that 1 unit increase of GPA is associated with the odds of being admitted increasing by 621%. Similarly, obtaining level 1 working experience will increase the odds of passing phase in by 335%. The AI algorithm account heavily on applicants' skills not gender. The hiring process is considered to be fair. 
 
-1 unit increase of GPA is associated with the odds of being admitted increasing by 621%. Similarly, obtaining level 1 working experience will increase the odds of passing phase in by 335%.
+
+For the research question 2: Is there any gender bias in remuneration processes? We do find gender bias in salaries. After applying several models, we find the most appropriate model to predict salaries for employees. The results from our model show that woman has lower salary by an average of $\$1758$ than man. We can clearly see our results consistent with the boxplot we create, men tend to have higher salaries across different jobs and role seniority. The limitation to this research question is that the model of our choice may not be the most apporoaite model. 
+
+For research question 3: Is there any 
 
 ### Strengths and limitations
-
+The limitations of testing gender bias in the three-phase hiring process is that the proportion of people that pass the examination for each phase is very small. It might not give us enough information to determine whether or not there is gender bias.
 \newpage
+
 # Consultant information
+
 ## Consultant profiles
 
 **Chengen Dong**. Chengen is a senior consultant with Calabash Brothers Solutions. He specializes in data visualization. Daniel earned his Bachelor of Science, Specialist in Statistics Methods and Practice, from the University of Toronto in 2024.
@@ -425,6 +432,3 @@ _In this section you will summarize your findings across all the research questi
 #### Growth: We always pursue professional growth
 
 
-
-
-__Final advice: KNIT EARLY AND OFTEN!__
