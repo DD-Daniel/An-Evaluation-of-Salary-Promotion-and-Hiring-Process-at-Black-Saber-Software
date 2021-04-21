@@ -106,6 +106,7 @@ joint12 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase1), fill = 
 joint12$team_applied_for <- as.factor(joint12$team_applied_for)
 model1 <- glmer(pass_phase1 ~ gpa + extracurriculars + work_experience + gender
                 + (1|team_applied_for), family = "binomial", data = joint12)
+summary(model1)
 ## Calculate CI
 ci <- confint(model1)
 ## Print Result of Regression
@@ -117,9 +118,19 @@ kable(table)
 ```
 ```{r}
 ## Phase 2 -> Phase 3
+## Join phase2 and phase3 data and create variable pass_phase2
+joint23 <- phase2 %>% left_join(phase3, by = "applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))
 
+## Draw Contingency Table
+table(factor(joint23$gender), factor(joint23$pass_phase2))
+
+## Visualize Contingency Table
+joint23 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase2), fill = gender))
+
+## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
+model2 <- glmer(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + (1|team_applied_for), family = "binomial", data = joint23)
+summary(model2)
 ```
-
 
 ```{r}
 #chunk new created by Peter
