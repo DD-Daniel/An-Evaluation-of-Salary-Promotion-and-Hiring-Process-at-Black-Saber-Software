@@ -1,6 +1,6 @@
 ---
-title: "An Evalution of Salary, Promotion, and Hiring Process at Black Saber "
-subtitle: "Evidence of Gender Bias in Salary"
+title: "Report title"
+subtitle: "Subtitle"
 author: "Report prepared for Black Saber Software by Calabash Brothers Solutions"
 date: 2021-04-21
 lang: "en"
@@ -37,17 +37,15 @@ _Guidelines for the executive summary:_
 
 \newpage
 # Technical report
+_This part of the report is much more comprehensive than the executive summary. The audience is statistics/data-minded people, but you should NOT include code or unformatted R output here._
+
 
 ## Introduction
 
-### Over the past few months, several companies in software have had bad press on people having complaints about their salaries, applicants having concerns about potenial bias in the hiring process. Chief People Officer | Black Saber Software had hired us and provided us with hiring data for new grad program, and data about promotion and salary for the entire staff. The report is to investigate whether there is potential bias in the hiring and remuneration processes, and to ensure that the company is out ahead of any potential issues.
+_Provide a brief introduction to your report and outline what the report will cover. This section is valuable for setting scope and expectations. _
 
 ### Research questions
-
-## 3. Use data on promotion and salary for the entire staff to investigate any potenial bias in remuneration process.
-
-
-
+_Use bullet points to to describe the research questions you are going to address. Write in full sentences._
 
 ## Informative title for section addressing a research question
 
@@ -156,12 +154,7 @@ kable(table2)
 ```
 
 
-<<<<<<< HEAD
 ```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-=======
-
-```{r}
->>>>>>> e33e85a31932db4d30a3a2251819f946e949ed75
 #chunk new created by Peter
 ## check if salary are fair in gender(gender)
 new_cemployees =  cemployees%>%
@@ -212,6 +205,15 @@ new_cemployees %>%
   theme_minimal() +
   ggtitle(label="Salary by role seniority and gender setting") +
   theme(legend.position = "right")
+```
+
+```{r}
+b = cemployees %>%
+  group_by(employee_id)%>%
+  count(role_seniority)
+colnames(b)[3] ="time_since_promotion" 
+
+  
 ```
 ## Discussion
 
