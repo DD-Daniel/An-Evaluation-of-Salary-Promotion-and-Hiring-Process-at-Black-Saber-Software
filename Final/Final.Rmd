@@ -271,6 +271,7 @@ table2 <- cbind(round(exp(summary(model2)$coeff[,1]),2),
                round(exp(ci2), 2),
                round(summary(model2)$coeff[,4],4))
 colnames(table2) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table2) <- c("Intercept", "Gender: Woman", "GPA",  "Technical Skills", "Writing Skills", "Leadship Presence", "Speaking Skills","Team Applied For: Software", "Work Experience 1", "Work Experience 2", "Extracurriculars 2")
 kable(table2)
 
 ## Print Result of Regression
@@ -384,9 +385,6 @@ colnames(b)[3] ="time_since_promotion"
 ```
 
 ## Discussion
-_In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
-
-1 unit increase of GPA is associated with the odds of being admitted increasing by 621%. Similarly, obtaining level 1 working experience will increase the odds of passing phase in by 335%.
 
 ### Strengths and limitations
 
