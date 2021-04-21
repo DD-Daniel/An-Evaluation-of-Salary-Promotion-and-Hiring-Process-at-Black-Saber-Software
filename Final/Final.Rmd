@@ -1,6 +1,6 @@
 ---
-title: "Report title"
-subtitle: "Subtitle"
+title: "An Evalution of Salary, Promotion, and Hiring Process at Black Saber "
+subtitle: "Evidence of bias "
 author: "Report prepared for Black Saber Software by Calabash Brothers Solutions"
 date: 2021-04-21
 lang: "en"
