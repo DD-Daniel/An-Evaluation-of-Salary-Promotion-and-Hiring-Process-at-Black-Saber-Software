@@ -260,8 +260,6 @@ table3 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
                round(summary(model3)$coeff[,4],4))
 colnames(table3) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table3)
-
-
 ```
 
 ### Phase 3 to Final Result
@@ -276,26 +274,16 @@ Therefore, we conclude that there is no gender bias during the process of hiring
 ```{r, echo = FALSE}
 ## Phase 3 -> Final
 
+## Visualization
 joint3f %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase3), fill = gender))
-
-
-model5 <- glm(pass_phase3 ~ gender + interviewer_rating_1:interviewer_rating_2, data = joint3f, family = "binomial")
-
-
 
 joint_3f <- joint3f %>% mutate(sum = interviewer_rating_1+interviewer_rating_2)
 
-#sort(joint_3f[
-  #order(- joint_3f[,17] ),
-#][1:10, ]$applicant_id)
-
-#sort(final_hire$applicant_id)
-
+## Build Linear regression Model
 model5 <- lm(sum ~ technical_skills + writing_skills + leadership_presence + speaking_skills + gender, data = joint_3f)
 
-
-ci5 <- confint(model5)
 ## Print Result of Regression
+ci5 <- confint(model5)
 table5 <- cbind(round(exp(summary(model5)$coeff[,1]),2),
                round(exp(ci5), 2),
                round(summary(model5)$coeff[,4],4))
@@ -314,8 +302,8 @@ Boxplot:
 
 From the graph, we can see that women have lower salaries across different role seniority.
 
-In order to test whether gender bias truely exists, we need to first find the most appropriate model. We create a simple linear regression model: $$y = x1+x$$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we apply linear mixed model: $$ y =    $$, we add the variable "team"(job in the company) as the random intercept. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram. For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better. Thus, the final model is $$    SED $$. 
-$$ SDF  $$
+In order to test whether gender bias truely exists, we need to first find the most appropriate model. We create a simple linear regression model: $$y = x1+x$$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we apply linear mixed model: $$ y =    $$, we add the variable "team"(job in the company) as the random intercept. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram. For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better. Thus, the final model is $$   $$. 
+$$ $$
 Based on interpretation, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
 
 
@@ -411,7 +399,10 @@ new_cemployees %>%
   theme_minimal()
 
 ```
+
 ## Discussion
+
+
 
 _In this section you will summarize your findings across all the research questions and discuss the strengths and limitations of your work. It doesn't have to be long, but keep in mind that often people will just skim the intro and the discussion of a document like this, so make sure it is useful as a semi-standalone section (doesn't have to be completely standalone like the executive summary)._
 
