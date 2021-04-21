@@ -68,7 +68,6 @@ my_plot <- cemployees %>%
   geom_histogram(colour = "grey", fill = "#6C3082") +
   theme_minimal() +
   labs(title = "Look! A title. But do you want a title or a caption for your report?", x = "This is a changed x label")
-
 # save your plot in your images folder, you can specify the height and width, too
 # saving this means you can add the image to your exectuve summary without having to run or rerun the code, if you wish
 ggsave("images/example.png", width = 7, height = 4)
@@ -106,6 +105,7 @@ joint12 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase1), fill = 
 joint12$team_applied_for <- as.factor(joint12$team_applied_for)
 model1 <- glmer(pass_phase1 ~ gpa + extracurriculars + work_experience + gender
                 + (1|team_applied_for), family = "binomial", data = joint12)
+summary(model1)
 ## Calculate CI
 ci <- confint(model1)
 ## Print Result of Regression
@@ -115,51 +115,101 @@ table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
 colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table)
 ```
+
 ```{r}
 ## Phase 2 -> Phase 3
+## Join phase2 and phase3 data and create variable pass_phase2
+joint23 <- phase2 %>% left_join(phase3, by = "applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))
 
+## Visualization for exploratory data analysis
+proptable2 <- table(factor(joint23$gender), factor(joint23$pass_phase2))
+proptable2 <- as.data.frame(prop.table(proptable2, 1))
+names(proptable2)[1]=('Gender')
+names(proptable2)[2]=('Pass')
+names(proptable2)[3]=("Proportion")
+ggplot(data=proptable2, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") 
+
+
+proptable3 <- joint23 %>% group_by(gender, team_applied_for, pass_phase2) %>% summarize(number = n()) %>% group_by(gender, team_applied_for) %>% summarize(pass_phase2 = pass_phase2, ratio = number/sum(number))
+ggplot(proptable3, aes(fill = factor(pass_phase2), y = ratio, x = team_applied_for)) + geom_bar(position = "fill", stat = "identity")+facet_grid(. ~ gender)
+
+## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
+model2 <- glmer(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + (1|team_applied_for), family = "binomial", data = joint23)
+summary(model2)
+
+model3 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + team_applied_for, family = "binomial", data = joint23)
+summary(model3)
+
+model4 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
+summary(model4)
+
+## Calculate CI
+ci2 <- confint(model3)
+## Print Result of Regression
+table2 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
+               round(exp(ci2[-1, ]), 2),
+               round(summary(model3)$coeff[,4],4))
+colnames(table2) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+kable(table2)
 ```
 
 
+<<<<<<< HEAD
+```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+=======
+
 ```{r}
+>>>>>>> e33e85a31932db4d30a3a2251819f946e949ed75
 #chunk new created by Peter
+## check if salary are fair in gender(gender)
 new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
-  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))%>%
-  filter(gender!="Prefer not to say")
+  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
 
-reg_salary_1 = lm(salary~productivity, data =new_cemployees)
-reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
-summary(reg_salary_1)
 
-reg_salary_3 = lmer(salary~productivity+(1|role_seniority)+(1|financial_q), data =new_cemployees)
-reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1|gender), data =new_cemployees)
-
-lmtest::lrtest(reg_salary_2, reg_salary_3)
-lmtest::lrtest(reg_salary_2, reg_salary_4)
-#has gender bias
-
-#create a boxplot
+#create a histogram of salary condition on role seniority
 new_cemployees %>%
-  ggplot(aes(x = gender,
-             y = salary,
-             color=role_seniority)) +
-  geom_boxplot() +
-  geom_point() +
-  facet_wrap(~role_seniority, nrow = 2) +
-  ggtitle(label="Salary by role seniority and gender setting") +
+  ggplot(aes(x = salary)) +
+  stat_bin(bins = 50)+
+  geom_histogram() +
+  facet_wrap(~role_seniority, nrow = 3) +
+  ggtitle(label="Histogram of salary condition on role seniority") +
   theme_bw() +
   theme(legend.position = "right")
 
-new_cemployees %>% 
-  ggplot(aes(y = salary, x = productivity,color = gender)) +
-  geom_point()+
-  geom_line(stat="smooth", method = "lm", formula = 'y~x') +
-  facet_grid(~role_seniority) +
-  scale_x_continuous(breaks = seq(2,12, by = 4)) +
-  scale_fill_brewer(palette = "Dark2")+
-  theme(legend.position = "right")+
-  theme_minimal()
+new_cemployees = new_cemployees%>%
+  filter(gender!="Prefer not to say")%>%
+  mutate(role_seniority = fct_relevel(role_seniority, "Director", after = 7))
+new_cemployees = new_cemployees%>%
+  mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 6))
+
+reg_salary_1 = lm(salary~productivity, data =new_cemployees)
+reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
+lmtest::lrtest(reg_salary_1, reg_salary_2)#check if role seniority as random intercept(baseline) is more significant
+
+reg_salary_3 = lmer(salary~productivity+(1|role_seniority)+(1|financial_q), data =new_cemployees)
+lmtest::lrtest(reg_salary_2, reg_salary_3) #check if financial quarter as random intercept is more significant
+
+reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1+productivity|financial_q), data =new_cemployees)
+lmtest::lrtest(reg_salary_2, reg_salary_4)
+#check if check if financial quarter as random intercept and random slope are more significant
+#productivity are affect by financial quarter(significant)
+
+reg_salary_5 = lmer(salary~productivity+(1|role_seniority)+(1+productivity|financial_q)+(1|gender), 
+                    data =new_cemployees) #final model
+lmtest::lrtest(reg_salary_4, reg_salary_5) 
+#check if gender as random intercept is significant
+#conclusion: has gender bias
+
+#create a boxplot
+new_cemployees %>%
+  ggplot(aes(x = role_seniority,
+             y = salary,
+             color=gender)) +
+  geom_boxplot() +
+  theme_minimal() +
+  ggtitle(label="Salary by role seniority and gender setting") +
+  theme(legend.position = "right")
 ```
 ## Discussion
 
