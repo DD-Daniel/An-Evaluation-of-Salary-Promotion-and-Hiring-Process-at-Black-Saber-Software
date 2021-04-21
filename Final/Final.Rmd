@@ -368,32 +368,67 @@ new_cemployees %>%
   theme(legend.position = "right")
 ## Print Result of Regression
 reg_salary <- cbind(round(summary(reg_salary_3)$coeff[,1],2))
-rownames(reg_salary) <- c("Intecept","Productivity","Gender: Women")
+rownames(reg_salary) <- c("Baseline salary","Productivity","Gender: Women")
 colnames(reg_salary)=c("Estimates")
 kable(reg_salary)
 ```
 
 ```{r, eval = FALSE}
-a = cemployees %>%
-  group_by(employee_id)%>%
-  count(role_seniority)
+#building the table
+entry_level =c()
+employee_id=c()
+for(i in 1:(N-1)){
+  if(cemployees$employee_id[i]!=cemployees$employee_id[i+1]){
+    entry_level = c(entry_level,cemployees$role_seniority[i])
+    employee_id=c(employee_id,cemployees$employee_id[i])
+  }}
 
-colnames(a)[3] ="time_since_promotion" 
+entry_level=c(entry_level,cemployees$role_seniority[N])
+employee_id=c(employee_id,cemployees$employee_id[N])
 
-b = cemployees %>%
+role_of_hiring=data.frame(employee_id,entry_level)
+
+promote_times = cemployees %>%
   group_by(employee_id)%>%
   distinct(role_seniority)
 
-b = b%>%
-  group_by(employee_id)%>%
-  count(employee_id)-1
-
-time1 = cemployees%>%
+promote_times = promote_times%>%
   group_by(employee_id)%>%
   count(employee_id)
-role = cemployees%>%
-  distinct(role_seniority)
-role
+
+time_period = cemployees%>%
+  group_by(employee_id)%>%
+  count(employee_id)
+colnames(time_period)[2]="time"
+
+gender = cemployees%>%
+  group_by(employee_id)%>%
+  distinct(Gender)
+promotion_table = gender%>%
+  left_join(promote_times,by = "employee_id")%>%
+  left_join(time_period,by = "employee_id")%>%
+  left_join(role_of_hiring, by ="employee_id")
+promotion_table$n = promotion_table$n-1
+colnames(promotion_table)[3]="promoted_times"
+#finish table
+promotion_table = promotion_table%>%
+  filter(Gender!="Prefer not to say")
+
+#Poisson Regreesion
+reg_promo_1 = glm(promoted_times~Gender,offset = time,family = poisson,data=promotion_table)
+reg_promo_2 = glmer(promoted_times~Gender+(1|entry_level),offset = time,family = poisson,data=promotion_table)
+lmtest::lrtest(reg_promo_1, reg_promo_2)
+summary(reg_promo_2)
+
+## Print Result of Regression
+cipro <- confint(reg_promo_2)
+table_promo <- cbind(round(exp(summary(reg_promo_2)$coeff[,1]),2),
+               round(exp(cipro)[-1,], 2),
+               round(summary(reg_promo_2)$coeff[,4],2))
+colnames(table_promo) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table_promo)= c("Baseline","Gender: Women")
+
+kable(table_promo)
 ```
 
 ## Discussion
