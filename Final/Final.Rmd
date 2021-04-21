@@ -26,6 +26,25 @@ knitr::opts_chunk$set(include=FALSE)
 \newpage
 # Executive summary
 
+Over the past few months, several software companies had received bad press about their hiring and remuneration processes, during which human bias are present. As a consequence, people have been raising concerns about potential bias in the recruitment and promotion process of Black Saber Software. Experts in our advisory and consulting group are hired to ensure the client company is out ahead of any potential such issues. This study following set out to assess whether the client company exhibits a bias against female in hiring, as well as 2013-2020 salary and promotion.
+
+The results of the study are summarized below.
+
+*
+
+
+*
+
+*
+
+*
+
+
+
+
+
+
+
 _Guidelines for the executive summary:_
 
 * _No more than two pages_
@@ -76,34 +95,85 @@ ggsave("images/example.png", width = 7, height = 4)
 # norice how the image is included with the ![](file/path.png) below
 ```
 
-![](images/example.png)
-<<<<<<< HEAD
+
+
 
 
 
 ```{r}
-joint23 <- phase2 %>% left_join(phase3, by="applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))
-
+## Summary Table I: Current employee by department and gender in the fourth quarter of 2020
+cemployees %>% group_by(team) %>% summarize(man = sum(Gender == "Man"), woman = sum(Gender == "Woman")) %>% mutate(total = man + woman, man_prop= man/total, woman_prop = woman/total)
 
 ```
 
-=======
-z
->>>>>>> 663f08c7f737a9979fab2770c089e3ba8e26c082
-## Informative title for section addressing a research question
-## Informative title for section addressing a research question
+
+```{r}
+
+## Figure I: The time series plot describes the promotion rate of male employees versus the promotion rate of female employees over time. The horizontal median line in the middle of the boxes represents the point at which the promotion rate of two genders are equal.
+
+
+N = nrow(cemployees)
+cemployees$promotion_or_not <- seq(1:N)
+cemployees$promotion_or_not[N] <- 0
+names(cemployees)[2] <- "Gender"
+for(i in 1:(N-1)){
+  
+  if((cemployees$employee_id[i] == cemployees$employee_id[i + 1]) &(cemployees$role_seniority[i] != cemployees$role_seniority[i+1])){
+    cemployees$promotion_or_not[i] <- 1
+  }
+  
+  else cemployees$promotion_or_not[i] <- 0
+}
+
+
+t1 <- cemployees %>% group_by(financial_q) %>%summarize(man = sum(Gender == "Man"), woman = sum(Gender == "Woman")) %>% mutate(total = man + woman, man_prop= man/total, woman_prop = woman/total)
+
+
+temp <-cemployees %>% filter(promotion_or_not == 1) %>% group_by(financial_q) %>%summarize(man = sum(Gender == "Man"), woman = sum(Gender == "Woman")) %>% mutate(total = man + woman, man_prop= man/total, woman_prop = woman/total)
+
+
+t2 <- t1 %>% left_join(temp, by = "financial_q")
+t2$man.y[is.na(t2$man.y)]<-0
+t2$woman.y[is.na(t2$woman.y)]<-0
+
+t2 <- t2 %>% mutate(prom_ratio_man = man.y/man.x, prom_ratio_woman = woman.y/woman.x)
+
+t2<-t2[,c(1,7,8,12,13)]
+t2
+
+
+t2$prom_ratio_man <- round(t2$prom_ratio_man,3)
+t2$prom_ratio_woman <- round(t2$prom_ratio_woman,3)
+t2 <- t2 %>% mutate(man_per = prom_ratio_man/(prom_ratio_man + prom_ratio_woman)) %>% filter(is.na(man_per) == FALSE)
+
+t2 %>% ggplot(aes(x = financial_q,  y = man_per, group = 1)) + geom_line()+geom_hline(yintercept = 0.5, linetype = "dashed", color = "red")+theme(axis.text.x = element_text(angle = 45))
+
+```
+
+
+
+
+
+
+
+
+
 
 ```{r, include = FALSE}
 library(tidyverse)
 library(lme4)
-<<<<<<< HEAD
-=======
+
 install.packages("ggmosaic")
 library(ggmosaic)
 library(knitr)
 install.packages("kableExtra")
 library(kableExtra)
 ```
+
+
+
+
+
 
 ```{r}
 ## Join Phase 1 and Phase 2, create variable pass_phase1
@@ -127,15 +197,14 @@ table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
                round(summary(model1)$coeff[,4],4))
 colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table)
->>>>>>> 663f08c7f737a9979fab2770c089e3ba8e26c082
+
 
 ```
 
 
 ```{r}
 #chunk new created by Peter
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 black_saber_current_employees %>%
   filter(gender != "Prefer not to say")%>%
   group_by(employee_id)%>%
@@ -144,15 +213,14 @@ black_saber_current_employees %>%
   theme_minimal() +
   scale_colour_brewer(palette = "Dark2")+
   theme(legend.position = "right")
-=======
+
 cemployees %>% 
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]"))
 reg_salary = lmer(salary~productivity+(1|role_seniority), data =cemployees)
 
 
 
->>>>>>> 0fe80ac6c83d44c2142886a8a0f90bfcf3fb0295
-=======
+
 new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
   mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))%>%
@@ -190,7 +258,7 @@ new_cemployees %>%
   scale_fill_brewer(palette = "Dark2")+
   theme(legend.position = "right")+
   theme_minimal()
->>>>>>> 9847f66853a706e2d232f6e49a33ba15700e398f
+
 ```
 ## Discussion
 
