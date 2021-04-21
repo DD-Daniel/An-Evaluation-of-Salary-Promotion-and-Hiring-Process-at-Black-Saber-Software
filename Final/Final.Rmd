@@ -373,15 +373,26 @@ new_cemployees %>%
 ```
 
 ```{r, eval = FALSE}
-b = cemployees %>%
-  group_by(employee_id)%>%
-  count(role_seniority)
-colnames(b)[3] ="time_since_promotion" 
 a = cemployees %>%
   group_by(employee_id)%>%
-  distinct(role_seniority)%>%
-  count(role_seniority)-1
-  
+  count(role_seniority)
+
+colnames(a)[3] ="time_since_promotion" 
+
+b = cemployees %>%
+  group_by(employee_id)%>%
+  distinct(role_seniority)
+
+b = b%>%
+  group_by(employee_id)%>%
+  count(employee_id)-1
+
+time1 = cemployees%>%
+  group_by(employee_id)%>%
+  count(employee_id)
+role = cemployees%>%
+  distinct(role_seniority)
+role
 ```
 
 ## Discussion
