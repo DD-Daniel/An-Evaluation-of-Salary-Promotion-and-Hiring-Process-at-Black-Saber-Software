@@ -1,6 +1,6 @@
 ---
 title: "An Evaluation of Salary, Promotion, and Hiring Process at Black Saber Software"
-subtitle: "Evidence of Gender Bias in Salary"
+subtitle: "Evidence of Gender Bias in Salary and Promotion"
 author: "Report prepared for Black Saber Software by Calabash Brothers Solutions"
 date: 2021-04-21
 lang: "en"
@@ -31,15 +31,15 @@ Over the past few months, several software companies had received bad press abou
 
 The results are summarized below.
 
-*The gender bias are not present in the first two rounds of the hiring process. Females and males have equal opportunities to be selected in both the first round and the second round of the recruiting. Neither men nor women are more favorable.
+*The gender bias is not present in the company's hiring process.
 
-*In the Phase I of the recruitment process, individuals who have higher GPA or those who have demonstrated some work experience in the past are more likely to be automatically selected by the AI to the next round. However, surprisingly, young professionals who have rich extracurricular experiences do not seem to have a notifiable advantage in the first round of the hiring. 
+*The Company AI tends to select people with strong professional background and strong technical&soft skills.
 
-*In the Phase II of the hiring, GPA and work experience are no longer a factor that will have an effect on the selection process. Instead, the evaluation of individuals focus on technical skills as well as other soft skills such as writing skills, speaking skills and leadership skills.
+*Male employees have higher salary while comparing to their female counterparts who have the same role seniority with the same job. 
 
-*Overall, current male employees have higher salary compared to their female counterparts who have the same role seniority under the same department. Female employees are not paid with the same amount salaries even if they have the same amount of workloads as male employees.
+*Female employees are not paid with the same amount salaries even if they have the same amount of workloads as male employees.
 
-*
+*Women are more likely to get promoted than men in the company.
 
 Key results of the study are summarized in the following tables.
 
@@ -321,7 +321,7 @@ Black Saber Software provides us with data about promotion and salary for the en
 
 From the graph, we can see that women have lower salaries across different role seniority.
 
-In order to test whether gender bias truely exists, we need to first find the most appropriate model. We create a simple linear regression model: $salary = \beta_0+\beta_1*Productivity+\beta_2*Gender$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we add the variable "team"(job in the company) as the random intercept in previous model to create a new linear mixed model. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram(see Figure.2 below). For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better.
+In order to test whether gender bias exists, we need to first find the most appropriate model. We create a simple linear regression model: $salary = \beta_0+\beta_1*Productivity+\beta_2*Gender$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we add the variable "team"(job in the company) as the random intercept in previous model to create a new linear mixed model. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram(see Figure.2 below). For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better.
 Thus, based on interpretation of our final model, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 #chunk new created by Peter
@@ -372,6 +372,10 @@ rownames(reg_salary) <- c("Baseline salary","Productivity","Gender: Women")
 colnames(reg_salary)=c("Estimates")
 kable(reg_salary)
 ```
+
+## Research Question 3: Is there any gender bias in the promotion process?
+To find whether there is gender bias in the promotion process, we decided to create a new data set called promotion_data. This new data set consists information of each employee's gender ,role seniority, and promoted times during several financial quarters. Then we apply a poison regression to predict the number of promoted times using gender as fixed effect over a time period. Then we add a random intercept role seniority to the model because we have to account for different numbers of employees in each role seniority. The higher seniority of one employee enters, the harder it is for him/her to get promotion. For example, the number of managers in the company is much smaller than the number of junior workers. After adding such to the model, we do a likelihood ratio test. The p-value(0<0.05) of the test tell us adding a random intercept does help explain the model better. Thus, we use the final model to interpret the results as follow:
+With all else constant, the number of promoted times of a female employee is 2.88 times higher than the number of promoted times of a male employee.
 
 ```{r, eval = FALSE}
 #building the table
@@ -437,10 +441,10 @@ For our research question 1: Is there any gender bias in the process of three-ph
 
 For the research question 2: Is there any gender bias in remuneration processes? We do find gender bias in salaries. After applying several models, we find the most appropriate model to predict salaries for employees. The results from our model show that woman has lower salary by an average of $\$1758$ than man. We can clearly see our results consistent with the boxplot we create, men tend to have higher salaries across different jobs and role seniority. The limitation to this research question is that the model of our choice may not be the most apporoaite model. 
 
-For research question 3: Is there any 
+For research question 3: Is there any gender bias in the promotion process? We do find gender bias in promotion process. The model shows that female has higher chance of getting promoted than male when they both enter the company in the same level of job and work for the same length of time. The reults are shown in the previous table.
 
 ### Strengths and limitations
-The limitations of testing gender bias in the three-phase hiring process is that the proportion of people that pass the examination for each phase is very small. It might not give us enough information to determine whether or not there is gender bias.
+The limitations of testing gender bias in the three-phase hiring process is that the proportion of people that pass the examination for each phase is very small. It may not give us enough information to determine whether or not there is gender bias. The limitations of testing gender bias in the remuneration process is that the model of our choice may not be the most appropriate, The limitation for the last research question is that the model of our final choice may over-explain the relationship of gender and promotion and the times of being promoted in very small.This may not be a indicator of gender bias in pratical terms.
 \newpage
 
 # Consultant information
@@ -449,7 +453,7 @@ The limitations of testing gender bias in the three-phase hiring process is that
 
 **Chengen Dong**. Chengen is a senior consultant with Calabash Brothers Solutions. He specializes in data visualization. Daniel earned his Bachelor of Science, Specialist in Statistics Methods and Practice, from the University of Toronto in 2024.
 
-**Yuxuan Longt**. Yuxuan is a senior consultant with Calabash Brothers Solutions. He specialize in reproducible analysis. Peter earned their Bachelor of Science, Majoring in Statistics from the University of Toronto in 2028.
+**Yuxuan Long**. Yuxuan is a senior consultant with Calabash Brothers Solutions. He specialize in reproducible analysis. Peter earned their Bachelor of Science, Majoring in Statistics from the University of Toronto in 2028.
 
 **Ran Li** Ran is a junior consultant in Calabash Brothers Solutions. She is good at coding with software like R and Python. She specializes in Computer Science. Liran earned her Bachelor of Science, Majoring in Computer Science from the University of Toronto in 2028.
 
