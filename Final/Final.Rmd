@@ -1,6 +1,6 @@
 ---
 title: "An Evaluation of Salary, Promotion, and Hiring Process at Black Saber Software"
-subtitle: "Evidence of gender bias in Salary"
+subtitle: "Evidence of Gender Bias in Salary"
 author: "Report prepared for Black Saber Software by Calabash Brothers Solutions"
 date: 2021-04-21
 lang: "en"
@@ -101,6 +101,26 @@ $$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Extracu
 where $Y_{i}$ is the acceptance of applicant $i$ , X_{i}s are explanatory variables.\newline
 
 The model is realized in R through the `glm` function. Result is shown in table 1. Not surprisingly, we find that GPA and work experiences are all significant at level 0.05. 1 unit increase of GPA is associated with the odds of being admitted increasing by 621%. Similarly, obtaining level 1 working experience will increase the odds of passing phase in by 335%. Most importantly, variable "gender: women" is highly insignificant with p-value 0.8576, which supports the nonexistence of gender bias in the first phase of hiring. Similar thing for the category where applicants are not willing to tell their gender.
+
+
+
+## Research Question 2: Is there any gender bias in the remuneration processes?
+Black Saber Software provide us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use to is creating a boxplot of salary conditions on role seniority and gender setting, and then applying different types of regression models to see which one best serve our purpose. 
+Boxplot: 
+
+
+
+
+
+From the graph, we can see that women have lower salaries across different role seniority.
+
+In order to test whether gender bias truely exists, we need to first find the most appropriate model. We create a simple linear regression model: $$y = x1+x$$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we apply linear mixed model: $$ y =    $$, we add the variable "team"(job in the company) as the random intercept. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram. For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better. Thus, the final model is $$     $$. 
+$$   $$
+Based on interpretation, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
+
+
+
+
 
 ```{r}
 ## Phase 1 -> Phase 2
@@ -270,18 +290,25 @@ _In this section you will summarize your findings across all the research questi
 # Consultant information
 ## Consultant profiles
 
-*Complete this section with a brief bio for each member of your group. If you are completing the project individually, you only need to complete one for yourself. In that case, change the title of this section to 'Consultant profile' instead. Examples below. This section is only marked for completeness, clarity and professionalism, not 'truth' so you can write it as if we're a few years in the future. Put your current degree in as completed and/or add your first choice grad school program, whatever you like. What skills related skills would you most like to highlight? What job title do you want?*
+**Chengen Dong**. Chengen is a senior consultant with Calabash Brothers Solutions. He specializes in data visualization. Daniel earned his Bachelor of Science, Specialist in Statistics Methods and Practice, from the University of Toronto in 2024.
 
-**Statsy McStatsstats**. Statsy is a senior consultant with Eminence Analytics. She specializes in data visualization. Statsy earned her Bachelor of Science, Specialist in Statistics Methods and Practice, from the University of Toronto in 2023.
+**Yuxuan Longt**. Yuxuan is a senior consultant with Calabash Brothers Solutions. He specialize in reproducible analysis. Peter earned their Bachelor of Science, Majoring in Statistics from the University of Toronto in 2028.
 
-**Datana Scatterplot**. Datana is a junior consultant with Eminence Analytics. They specialize in reproducible analysis and statistical communication. Datana earned their Bachelor of Science, Majoring in Computer Science and Statistics from the University of Toronto in 2024.
+**Ran Li** Ran is a junior consultant in Calabash Brothers Solutions. She is good at coding with software like R and Python. She specializes in Computer Science. Liran earned her Bachelor of Science, Majoring in Computer Science from the University of Toronto in 2028.
+
+**Peizhe Huang** Peizhe is a senior consultant with Calabash Brothers Solutions. She specializes in Probability Statistics. Peizhe earned their Bachelor of Science, Majoring in Statistics from the University of Toronto in 2022.
 
 ## Code of ethical conduct
 
-_This section should be fairly short, no more than half a page. Assume a general audience, much like your executive summary._
+#### Integrity: We maintained honest with our data and clear communication throughout the working process.
 
-* _Make at least three relevant statements about your company’s approach to ethical statistical consulting. These should be appropriately in line with professional conduct advice like the (Statistical Society of Canada Code of Conduct)[https://ssc.ca/sites/default/files/data/Members/public/Accreditation/ethics_e.pdf] or the (Ethical Guidelines for Statistical Practice from the American Statistical Society)[https://www.amstat.org/ASA/Your-Career/Ethical-Guidelines-for-Statistical-Practice.aspx]. For example, "the customer is always right" ISN’T the type of thing an ethical statistical consultant would include._
-*	_Be very careful not to just copy and paste from these other documents! Put things in your own words._
+#### Teamwork: We worked together to get the job done.
+
+#### Confidentiality: We maintained clients' condifence at all time
+
+#### Growth: We always pursue professional growth
+
+
 
 
 __Final advice: KNIT EARLY AND OFTEN!__
