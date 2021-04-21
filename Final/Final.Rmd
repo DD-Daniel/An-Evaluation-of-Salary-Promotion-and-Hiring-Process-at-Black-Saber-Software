@@ -77,33 +77,89 @@ ggsave("images/example.png", width = 7, height = 4)
 ```
 
 ![](images/example.png)
-
+z
 ## Informative title for section addressing a research question
 ## Informative title for section addressing a research question
 
 ```{r, include = FALSE}
 library(tidyverse)
 library(lme4)
+install.packages("ggmosaic")
+library(ggmosaic)
+library(knitr)
+install.packages("kableExtra")
+library(kableExtra)
 ```
 
 ```{r}
-## Join Phase 1 and Phase 2
+## Phase 1 -> Phase 2
+## Join Phase 1 and Phase 2, create variable pass_phase1
 joint12 <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))
 
-## Build Logistic regression model to explain whether or not phase 1 is passed
-model1 <- glm(pass_phase1 ~ gpa + extracurriculars + work_experience + team_applied_for, family = "binomial", data = joint12) 
-summary(model1)
+## Draw Contingency Table
+table(factor(joint12$gender), factor(joint12$pass_phase1))
+
+## Visualize Contingency Table
+joint12 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase1), fill = gender))
+
+## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
+joint12$team_applied_for <- as.factor(joint12$team_applied_for)
+model1 <- glmer(pass_phase1 ~ gpa + extracurriculars + work_experience + gender
+                + (1|team_applied_for), family = "binomial", data = joint12)
+## Calculate CI
+ci <- confint(model1)
+## Print Result of Regression
+table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
+               round(exp(ci[-1, ]), 2),
+               round(summary(model1)$coeff[,4],4))
+colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+kable(table)
+```
+```{r}
+## Phase 2 -> Phase 3
+
 ```
 
 
 ```{r}
 #chunk new created by Peter
-cemployees %>% 
-  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]"))
-reg_salary = lmer(salary~productivity+(1|role_seniority), data =cemployees)
+new_cemployees =  cemployees%>%
+  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
+  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))%>%
+  filter(gender!="Prefer not to say")
 
+reg_salary_1 = lm(salary~productivity, data =new_cemployees)
+reg_salary_2 = lmer(salary~productivity+(1|role_seniority), data =new_cemployees)
+summary(reg_salary_1)
 
+reg_salary_3 = lmer(salary~productivity+(1|role_seniority)+(1|financial_q), data =new_cemployees)
+reg_salary_4 = lmer(salary~productivity+(1|role_seniority)+(1|gender), data =new_cemployees)
 
+lmtest::lrtest(reg_salary_2, reg_salary_3)
+lmtest::lrtest(reg_salary_2, reg_salary_4)
+#has gender bias
+
+#create a boxplot
+new_cemployees %>%
+  ggplot(aes(x = gender,
+             y = salary,
+             color=role_seniority)) +
+  geom_boxplot() +
+  geom_point() +
+  facet_wrap(~role_seniority, nrow = 2) +
+  ggtitle(label="Salary by role seniority and gender setting") +
+  theme_bw() +
+  theme(legend.position = "right")
+
+new_cemployees %>% 
+  ggplot(aes(y = salary, x = productivity,color = gender)) +
+  geom_point()+
+  geom_line(stat="smooth", method = "lm", formula = 'y~x') +
+  facet_grid(~role_seniority) +
+  scale_x_continuous(breaks = seq(2,12, by = 4)) +
+  scale_fill_brewer(palette = "Dark2")+
+  theme(legend.position = "right")+
+  theme_minimal()
 ```
 ## Discussion
 
