@@ -1,6 +1,6 @@
 ---
 title: "An Evaluation of Salary, Promotion, and Hiring Process at Black Saber Software"
-subtitle: "Evidence of Gender Bias in Salary"
+subtitle: "Evidence of Gender Bias in Salary and Promotion"
 author: "Report prepared for Black Saber Software by Calabash Brothers Solutions"
 date: 2021-04-21
 lang: "en"
@@ -31,6 +31,7 @@ Over the past few months, several software companies had received bad press abou
 
 Results are summarized below.
 
+<<<<<<< HEAD
 * The gender bias are not present in the hiring process. In Figure 1, there is no obvious difference in the ratio of being selected for male and female. Females and males have equal opportunities to be selected during the recruiting including AI selection and interviews. Neither men nor women are more favorable.
 
 * In Phase I of the recruitment process, individuals who have higher GPA or those who have demonstrated some work experience in the past are more likely to be automatically selected by the AI to the next round. However, surprisingly, young professionals who have rich extracurricular experiences do not seem to have a notifiable advantage in the first round of the hiring. 
@@ -38,6 +39,19 @@ Results are summarized below.
 * In Phase II of the hiring, GPA and work experience are no longer a factor that will have an effect on the selection process. Instead, the evaluation of individuals focus on technical skills as well as other soft skills such as writing skills, speaking skills and leadership skills.
 
 * In Phase III of the hiring, the most influencing factor is the rating of two interviewers. By analyzing data of acceptance and rejection during interview, there is still no gender bias observed.
+=======
+*The gender bias is not present in the company's hiring process.
+
+*The Company AI tends to select people with strong professional background and strong technical&soft skills.
+
+*Male employees have higher salary while comparing to their female counterparts who have the same role seniority with the same job. 
+
+*Female employees are not paid with the same amount salaries even if they have the same amount of workloads as male employees.
+
+*Women are more likely to get promoted than men in the company.
+
+Key results of the study are summarized in the following tables.
+>>>>>>> 88b72590398c62bad200a07a38c44b9f97769185
 
 * Overall, current male employees have higher salary compared to their female counterparts who have the same role seniority under the same department (see Figure 2). Female employees are not paid with the same amount salaries even if they have the same amount of workloads as male employees.
 
@@ -339,6 +353,7 @@ kable(table5, booktabs = TRUE, caption = "Logistic Regression Result from Phase 
 ```
 
 ## Research Question 2: Is there any gender bias in the remuneration processes?
+<<<<<<< HEAD
 Black Saber Software provides us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use is creating a boxplot of salary conditions on role seniority and gender setting, and then applying different types of regression models to see which one best serve our purpose. \newline
 
 From the Figure2 in the executive summary, we can see that women have lower salaries across different role seniority.
@@ -349,25 +364,34 @@ We find out that gender is statistically significant with p-value far less than 
 Thus, based on interpretation of our final model, woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
 
 ```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE, fig.show = "hold", out.width = "50%"}
+=======
+Black Saber Software provides us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use to is creating a boxplot of salary conditions on role seniority and gender setting(see Figure.1 below), and then applying different types of regression models to see which one best serve our purpose. 
+
+```{r}
+
+```  
+
+
+
+
+From the graph, we can see that women have lower salaries across different role seniority.
+
+In order to test whether gender bias exists, we need to first find the most appropriate model. We create a simple linear regression model: $salary = \beta_0+\beta_1*Productivity+\beta_2*Gender$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we add the variable "team"(job in the company) as the random intercept in previous model to create a new linear mixed model. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram(see Figure.2 below). For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better.
+Thus, based on interpretation of our final model, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+>>>>>>> 88b72590398c62bad200a07a38c44b9f97769185
 #chunk new created by Peter
 ## check if salary are fair in gender(gender)
 new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
   mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
-#create a histogram of salary condition on role seniority
-new_cemployees %>%
-  ggplot(aes(x = salary)) +
-  stat_bin(bins = 50)+
-  geom_histogram() +
-  facet_wrap(~role_seniority, nrow = 3) +
-  ggtitle(label="Histogram of salary condition on role seniority") +
-  theme_bw() +
-  theme(legend.position = "right")
+
 new_cemployees = new_cemployees%>%
   filter(Gender!="Prefer not to say")%>%
   mutate(role_seniority = fct_relevel(role_seniority, "Director", after = 7))
 new_cemployees = new_cemployees%>%
   mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 6))
+<<<<<<< HEAD
 #create a boxplot
 new_cemployees %>%
   ggplot(aes(x = role_seniority,
@@ -377,6 +401,8 @@ new_cemployees %>%
   theme_minimal() +
   ggtitle(label="Salary by role seniority and gender setting") +
   theme(legend.position = "right")
+=======
+>>>>>>> 88b72590398c62bad200a07a38c44b9f97769185
 ```
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -390,13 +416,38 @@ lmtest::lrtest(reg_salary_2, reg_salary_3)#check if role seniority as random int
 ```
 
 ```{r echo=FALSE,message=FALSE, warning=FALSE}
+<<<<<<< HEAD
 ## Print Result of Regression
 reg_salary <- cbind(round(summary(reg_salary_3)$coeff[,1],2))
 rownames(reg_salary) <- c("Intecept","Productivity","Gender: Women")
+=======
+#create a boxplot
+new_cemployees %>%
+  ggplot(aes(x = role_seniority,
+             y = salary,
+             color=Gender)) +
+  geom_boxplot() +
+  theme_minimal() +
+  ggtitle(label="Figure.1: Salary by role seniority and gender setting") +
+  theme(legend.position = "right")
+#create a histogram of salary condition on role seniority
+new_cemployees %>%
+  ggplot(aes(x = salary)) +
+  stat_bin(bins = 50)+
+  geom_histogram() +
+  facet_wrap(~role_seniority, nrow = 3) +
+  ggtitle(label="Figure.2: Histogram of salary condition on role seniority") +
+  theme_bw() +
+  theme(legend.position = "right")
+## Print Result of Regression
+reg_salary <- cbind(round(summary(reg_salary_3)$coeff[,1],2))
+rownames(reg_salary) <- c("Baseline salary","Productivity","Gender: Women")
+>>>>>>> 88b72590398c62bad200a07a38c44b9f97769185
 colnames(reg_salary)=c("Estimates")
 kable(reg_salary)
 ```
 
+<<<<<<< HEAD
 ```{r, eval = FALSE}
 a = cemployees %>%
   group_by(employee_id)%>%
@@ -409,11 +460,68 @@ b = b%>%
   group_by(employee_id)%>%
   count(employee_id)-1
 time1 = cemployees%>%
+=======
+## Research Question 3: Is there any gender bias in the promotion process?
+To find whether there is gender bias in the promotion process, we decided to create a new data set called promotion_data. This new data set consists information of each employee's gender ,role seniority, and promoted times during several financial quarters. Then we apply a poison regression to predict the number of promoted times using gender as fixed effect over a time period. Then we add a random intercept role seniority to the model because we have to account for different numbers of employees in each role seniority. The higher seniority of one employee enters, the harder it is for him/her to get promotion. For example, the number of managers in the company is much smaller than the number of junior workers. After adding such to the model, we do a likelihood ratio test. The p-value(0<0.05) of the test tell us adding a random intercept does help explain the model better. Thus, we use the final model to interpret the results as follow:
+With all else constant, the number of promoted times of a female employee is 2.88 times higher than the number of promoted times of a male employee.
+
+```{r, eval = FALSE}
+#building the table
+entry_level =c()
+employee_id=c()
+for(i in 1:(N-1)){
+  if(cemployees$employee_id[i]!=cemployees$employee_id[i+1]){
+    entry_level = c(entry_level,cemployees$role_seniority[i])
+    employee_id=c(employee_id,cemployees$employee_id[i])
+  }}
+
+entry_level=c(entry_level,cemployees$role_seniority[N])
+employee_id=c(employee_id,cemployees$employee_id[N])
+
+role_of_hiring=data.frame(employee_id,entry_level)
+
+promote_times = cemployees %>%
+  group_by(employee_id)%>%
+  distinct(role_seniority)
+
+promote_times = promote_times%>%
   group_by(employee_id)%>%
   count(employee_id)
-role = cemployees%>%
-  distinct(role_seniority)
-role
+
+time_period = cemployees%>%
+>>>>>>> 88b72590398c62bad200a07a38c44b9f97769185
+  group_by(employee_id)%>%
+  count(employee_id)
+colnames(time_period)[2]="time"
+
+gender = cemployees%>%
+  group_by(employee_id)%>%
+  distinct(Gender)
+promotion_table = gender%>%
+  left_join(promote_times,by = "employee_id")%>%
+  left_join(time_period,by = "employee_id")%>%
+  left_join(role_of_hiring, by ="employee_id")
+promotion_table$n = promotion_table$n-1
+colnames(promotion_table)[3]="promoted_times"
+#finish table
+promotion_table = promotion_table%>%
+  filter(Gender!="Prefer not to say")
+
+#Poisson Regreesion
+reg_promo_1 = glm(promoted_times~Gender,offset = time,family = poisson,data=promotion_table)
+reg_promo_2 = glmer(promoted_times~Gender+(1|entry_level),offset = time,family = poisson,data=promotion_table)
+lmtest::lrtest(reg_promo_1, reg_promo_2)
+summary(reg_promo_2)
+
+## Print Result of Regression
+cipro <- confint(reg_promo_2)
+table_promo <- cbind(round(exp(summary(reg_promo_2)$coeff[,1]),2),
+               round(exp(cipro)[-1,], 2),
+               round(summary(reg_promo_2)$coeff[,4],2))
+colnames(table_promo) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table_promo)= c("Baseline","Gender: Women")
+
+kable(table_promo)
 ```
 
 ## Discussion
@@ -422,12 +530,16 @@ For our research question 1: Is there any gender bias in the process of three-ph
 
 For the research question 2: Is there any gender bias in remuneration processes? We do find gender bias in salaries. After applying several models, we find the most appropriate model to predict salaries for employees. The results from our model show that woman has lower salary by an average of $\$1758$ than man. We can clearly see our results consistent with the boxplot we created, men tend to have higher salaries across various jobs and role seniority. The limitation to this research question is that the model of our choice may not be the most appropriate model.
 
-For research question 3: Is there any 
+For research question 3: Is there any gender bias in the promotion process? We do find gender bias in promotion process. The model shows that female has higher chance of getting promoted than male when they both enter the company in the same level of job and work for the same length of time. The reults are shown in the previous table.
 
 ### Strengths and limitations
+<<<<<<< HEAD
 The limitations of testing gender bias in the three-phase hiring process is that the proportion of people that pass the examination for each phase is very small. It might not give us enough information to determine whether or not there is gender bias. For example, in phase 3, it is actually a rough approximation to model the interviewer's score to predict the result of interview because phase 3 only has 22 people, we do not have enough data to investigate if interview's score is the best predictor for final decision. \newline
 Another limitation is that when we try to predict interviewer's score, the covariates that we chose are not guaranteed the best ones since we just used data from previous phases. There must be some other factors that will affect one's performance in interview other than the AI assessment scores based on real life experience. Our next steps will be to use richer data set to perform more accurate modeling.
 
+=======
+The limitations of testing gender bias in the three-phase hiring process is that the proportion of people that pass the examination for each phase is very small. It may not give us enough information to determine whether or not there is gender bias. The limitations of testing gender bias in the remuneration process is that the model of our choice may not be the most appropriate, The limitation for the last research question is that the model of our final choice may over-explain the relationship of gender and promotion and the times of being promoted in very small.This may not be a indicator of gender bias in pratical terms.
+>>>>>>> 88b72590398c62bad200a07a38c44b9f97769185
 \newpage
 
 # Consultant information
@@ -436,7 +548,7 @@ Another limitation is that when we try to predict interviewer's score, the covar
 
 **Chengen Dong**. Chengen is a senior consultant with Calabash Brothers Solutions. He specializes in data visualization. Daniel earned his Bachelor of Science, Specialist in Statistics Methods and Practice, from the University of Toronto in 2024.
 
-**Yuxuan Longt**. Yuxuan is a senior consultant with Calabash Brothers Solutions. He specialize in reproducible analysis. Peter earned their Bachelor of Science, Majoring in Statistics from the University of Toronto in 2028.
+**Yuxuan Long**. Yuxuan is a senior consultant with Calabash Brothers Solutions. He specialize in reproducible analysis. Peter earned their Bachelor of Science, Majoring in Statistics from the University of Toronto in 2028.
 
 **Ran Li** Ran is a junior consultant in Calabash Brothers Solutions. She is good at coding with software like R and Python. She specializes in Computer Science. Liran earned her Bachelor of Science, Majoring in Computer Science from the University of Toronto in 2028.
 
