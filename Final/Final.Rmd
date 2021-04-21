@@ -116,21 +116,45 @@ table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
 colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table)
 ```
+
 ```{r}
 ## Phase 2 -> Phase 3
 ## Join phase2 and phase3 data and create variable pass_phase2
 joint23 <- phase2 %>% left_join(phase3, by = "applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))
 
-## Draw Contingency Table
-table(factor(joint23$gender), factor(joint23$pass_phase2))
+## Visualization for exploratory data analysis
+proptable2 <- table(factor(joint23$gender), factor(joint23$pass_phase2))
+proptable2 <- as.data.frame(prop.table(proptable2, 1))
+names(proptable2)[1]=('Gender')
+names(proptable2)[2]=('Pass')
+names(proptable2)[3]=("Proportion")
+ggplot(data=proptable2, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") 
 
-## Visualize Contingency Table
-joint23 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase2), fill = gender))
+table(factor(joint23$gender), factor(joint23$pass_phase2), factor(joint23$team_applied_for))
+
 
 ## Build Mixed Logistic regression model to explain whether or not phase 1 is passed
 model2 <- glmer(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + (1|team_applied_for), family = "binomial", data = joint23)
 summary(model2)
+
+model3 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + team_applied_for, family = "binomial", data = joint23)
+summary(model3)
+
+model4 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
+summary(model4)
+
+
+## Calculate CI
+ci2 <- confint(model3)
+## Print Result of Regression
+table2 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
+               round(exp(ci2[-1, ]), 2),
+               round(summary(model3)$coeff[,4],4))
+colnames(table2) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+kable(table2)
 ```
+
+
 
 ```{r}
 #chunk new created by Peter
