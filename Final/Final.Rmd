@@ -20,6 +20,7 @@ titlepage-rule-height: 2
 library(tidyverse)
 # this should supress all code and messages
 knitr::opts_chunk$set(include=TRUE, message = FALSE, echo = FALSE, warning = FALSE)
+options(scipen = 999)
 ```
 
 
@@ -86,7 +87,7 @@ joint3f <- joint23 %>% filter(is.na(interviewer_rating_1)==FALSE) %>% left_join(
 joint3f$pass_phase3[is.na(joint3f$pass_phase3)] <- 0 
 ```
 
-```{r}
+```{r, fig.show = "hold", out.width = "30%"}
 joint12_filter <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))%>% filter(gender !='Prefer not to say')
 proptable0 <- table(factor(joint12_filter$gender), factor(joint12_filter$pass_phase1))
 proptable0 <- as.data.frame(prop.table(proptable0, 1))
@@ -164,7 +165,6 @@ t2$prom_ratio_woman <- round(t2$prom_ratio_woman,3)
 t2 <- t2 %>% mutate(man_per = prom_ratio_man/(prom_ratio_man + prom_ratio_woman)) %>% filter(is.na(man_per) == FALSE)
 
 t2 %>% ggplot(aes(x = financial_q,  y = man_per, group = 1)) + geom_line()+geom_hline(yintercept = 0.5, linetype = "dashed", color = "red")+theme(axis.text.x = element_text(angle = 45))
-
 ```
 
 \newpage
@@ -199,8 +199,9 @@ where $Y_{i}$ is the acceptance of applicant $i$ , $X_{i}$s are explanatory vari
 
 The model is realized in R through the `glm` function. Result is shown in table 1. Not surprisingly, we find that GPA and work experiences are all significant at level 0.05. 1 unit increase of GPA is associated with the odds of being admitted increasing by 621%. Similarly, obtaining level 1 working experience will increase the odds of passing phase in by 335%. Most importantly, variable "gender: women" is highly insignificant with p-value 0.8576, which supports the nonexistence of gender bias in the first phase of hiring. Similar thing for the category where applicants are not willing to tell their gender.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.show = "hold", out.width = "50%"}
 ## Phase 1 -> Phase 2
+
 ## Visualize Contingency Table
 joint12 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase1), fill = gender))
 
@@ -220,6 +221,12 @@ table <- cbind(round(exp(summary(model1)$coeff[,1]),2),
                round(exp(ci), 2),
                round(summary(model1)$coeff[,4],4))
 colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+rownames(table) <- c("Intercept", 'GPA', 'Extracurriculars 1', 'Extracurriculars 2', "Work Experience 1", "Work Experience 2", "Gender: Prefer Not To Say", "Gender: Women", "Team Applied for: Software")
+
+table[3, 2] <- "2.23e+25"
+table[3, 3] <- "4.42e+92"
+table[4, 2] <- "2.18e+38"
+table[4, 3] <- "1.88e+93"
 kable(table)
 ```
 
@@ -237,9 +244,9 @@ See table 2 for the result of model coefficients after exponentiation realized b
 $$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Technical Skills}_{i}+ \beta_3\text{Writing Skills}_{i} + \beta_4 \text{Speaking Skills}_i+ \beta_5 \text{Leadership Presence}_i$$ 
 See table 3 for model results and this is a better model to fit since the AIC of the model drops from 87.527 to 83.574. The result table also suggests fairness between man and women since they are still insignificance with p-value 0.4205 > 0.01.\newline 
 
-By conducting logistic regression, we find the algorithm for selecting applicant in phase 2 does not depend much on the significant variables in phase 1 but on the test scores for relevant skills and the selection process is also irrelevent with one's gender.\newline 
+By conducting logistic regression, we find the algorithm for selecting applicant in phase 2 does not depend much on the significant variables in phase 1 but on the test scores for relevant skills and the selection process is also irrelevant with one's gender.\newline 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.show = "hold", out.width = "50%"}
 ## Phase 2 -> Phase 3
 
 ## Visualization for exploratory data analysis
@@ -266,9 +273,8 @@ table2 <- cbind(round(exp(summary(model2)$coeff[,1]),2),
 colnames(table2) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table2)
 
-
-ci3 <- confint(model3)
 ## Print Result of Regression
+ci3 <- confint(model3)
 table3 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
                round(exp(ci3), 2),
                round(summary(model3)$coeff[,4],4))
@@ -285,7 +291,7 @@ Table 3 shows the results of the simple linear regression. All the skills relate
 
 Therefore, we conclude that there is no gender bias during the process of hiring in Black Saber Software Company.\newline
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.show = "hold", out.width = "50%"}
 ## Phase 3 -> Final
 
 ## Visualization
@@ -321,7 +327,7 @@ $$ $$
 Based on interpretation, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
 
 
-```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE, eval = FALSE}
 #chunk new created by Peter
 ## check if salary are fair in gender(gender)
 new_cemployees =  cemployees%>%
@@ -366,7 +372,7 @@ new_cemployees %>%
   theme(legend.position = "right")
 ```
 
-```{r}
+```{r, eval = FALSE}
 b = cemployees %>%
   group_by(employee_id)%>%
   count(role_seniority)
