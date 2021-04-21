@@ -19,7 +19,7 @@ titlepage-rule-height: 2
 ```{r, message = FALSE, echo=FALSE}
 library(tidyverse)
 # this should supress all code and messages
-knitr::opts_chunk$set(include=FALSE)
+knitr::opts_chunk$set(include=TRUE, message = FALSE, echo = FALSE, warning = FALSE)
 ```
 
 
@@ -78,7 +78,19 @@ _Use bullet points to to describe the research questions you are going to addres
 
 _For each research question, you will want to briefly describe any data manipulation, show some exploratory plots/summary tables, report on any methods you use (i.e. models you fit) and the conclusions you draw from these_
 
-```{r}
+```{r, include = FALSE, echo = FALSE}
+library(tidyverse)
+library(lme4)
+
+install.packages("ggmosaic")
+library(ggmosaic)
+library(knitr)
+library(kableExtra)
+
+```
+
+```{r, echo = FALSE}
+## Read in Data
 # This chunk provides an example of some things you can do with RMarkdown to make your report creation process easier
 
 # read in the data
@@ -87,37 +99,35 @@ phase1 <- read_csv("data/phase1-new-grad-applicants-2020.csv")
 phase2 <- read_csv("data/phase2-new-grad-applicants-2020.csv")
 phase3 <- read_csv("data/phase3-new-grad-applicants-2020.csv")
 final_hire <- read_csv("data/final-hires-newgrad_2020.csv")
-
-
-# create a visualization
-my_plot <- cemployees %>% 
-  ggplot(aes(x = productivity)) +
-  geom_histogram(colour = "grey", fill = "#6C3082") +
-  theme_minimal() +
-  labs(title = "Look! A title. But do you want a title or a caption for your report?", x = "This is a changed x label")
-# save your plot in your images folder, you can specify the height and width, too
-# saving this means you can add the image to your exectutive summary without having to run or rerun the code, if you wish
-ggsave("images/example.png", width = 7, height = 4)
-
-# notice how the image is included with the ![](file/path.png) below
 ```
 
 
-
-
-
-
 ```{r}
+## Data Wrangling and tidy data
+
+## Join Phase 1 and Phase 2, create variable pass_phase1
+joint12 <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))
+
+
+## Join phase2 and phase3 data and create variable pass_phase2
+joint23 <- phase2 %>% left_join(phase3, by = "applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))
+
+## Join phase3 and final hire data 
+final_hire <- final_hire %>% mutate(pass_phase3 = 1)
+joint3f <- joint23 %>% filter(is.na(interviewer_rating_1)==FALSE) %>% left_join(final_hire, by = "applicant_id")
+joint3f$pass_phase3[is.na(joint3f$pass_phase3)] <- 0 
+```
+
+
+```{r, echo = FALSE}
 ## Summary Table I: Current employee by department and gender in the fourth quarter of 2020
-cemployees %>% group_by(team) %>% summarize(man = sum(gender == "Man"), woman = sum(gender == "Woman")) %>% mutate(total = man + woman, man_prop= man/total, woman_prop = woman/total)
-
+summary_1 <- cemployees %>% group_by(team) %>% summarize(man = sum(gender == "Man"), woman = sum(gender == "Woman")) %>% mutate(total = man + woman, man_prop= man/total, woman_prop = woman/total)
+kable(summary_1)
 ```
 
 
-```{r}
-
+```{r, echo = FALSE}
 ## Figure I: The time series plot describes the promotion rate of male employees versus the promotion rate of female employees over time. The horizontal median line in the middle of the boxes represents the point at which the promotion rate of two genders are equal.
-
 
 N = nrow(cemployees)
 cemployees$promotion_or_not <- seq(1:N)
@@ -146,7 +156,7 @@ t2$woman.y[is.na(t2$woman.y)]<-0
 t2 <- t2 %>% mutate(prom_ratio_man = man.y/man.x, prom_ratio_woman = woman.y/woman.x)
 
 t2<-t2[,c(1,7,8,12,13)]
-t2
+
 
 
 t2$prom_ratio_man <- round(t2$prom_ratio_man,3)
@@ -158,26 +168,6 @@ t2 %>% ggplot(aes(x = financial_q,  y = man_per, group = 1)) + geom_line()+geom_
 ```
 
 
-
-
-
-
-
-
-
-```{r, include = FALSE}
-library(tidyverse)
-library(lme4)
-
-install.packages("ggmosaic")
-library(ggmosaic)
-library(knitr)
-library(kableExtra)
-
-```
-
-
-
 ## Research Question 1: Is gender bias involved in the process of three-phases recruitment?
 
 It is known that the recruitment process in Black Saber Software Company consists of three phases, so our examination of fairness of the hiring process will be focusing on analyzing hiring data in each phase respectively. By using the provided data sets containing information for applicants, we can construct statistical model (Logistics Regression in this report) using gender and other covariates to explain the probability of a given applicant being selected in each phase. Whether of not gender bias exists can be checked by its significance in the model we construct. This is the general methodology that we use to resolve this question. We will now go through the detailed process of model constructing for each phase as follows.
@@ -185,49 +175,18 @@ It is known that the recruitment process in Black Saber Software Company consist
 ### Phase 1 $\rightarrow$ Phase 2
 We start by left joining applicants data in phase 2 into phase 1 by using function `left_join` in the `tidyverse` package in R with applicant ID and add binary variable `pass_phase1` to indicate whether the applicant is selected to the next phase. \newline
 
-In order to build model, some exploratory data analysis is performed as follows. Note that Figure 1 is the visualization for the contingency table that represents the proportion of applicants in each gender that are selected to the next phase. It can be seen that the proportion of men and women that are selected to the next phase is roughly the same. Out of those who apply for data team, `r 132/(124+132)` are selected and out of those who apply for software tea,`r `168/(168+189)` applicants are selected to move on. Figure 2 compares the proportion of applicants who are selected by their gender and the team they apply to work with. The plot suggests that for each gender group, their is a slightly higher proportion of acceptance if the applicant is willing to work in the data team compared to the software team. Therefore, a term for the team that applicants want to apply for will be considered in our model. It is also worth noting that no obvious difference can be observed between men and women group, which also agree with our previous plot. \newline
+In order to build model, some exploratory data analysis is performed as follows. Note that Figure 1 is the visualization for the contingency table that represents the proportion of applicants in each gender that are selected to the next phase. It can be seen that the proportion of men and women that are selected to the next phase is roughly the same. Out of those who apply for data team, `r 132/(124+132)` are selected and out of those who apply for software tea,`r 168/(168+189)` applicants are selected to move on. Figure 2 compares the proportion of applicants who are selected by their gender and the team they apply to work with. The plot suggests that for each gender group, their is a slightly higher proportion of acceptance if the applicant is willing to work in the data team compared to the software team. Therefore, a term for the team that applicants want to apply for will be considered in our model. It is also worth noting that no obvious difference can be observed between men and women group, which also agree with our previous plot. \newline
 
 Our outcome of interest is whether the applicant passes phase 1, and our predictors are GPA, work experience, extracurricular and team the applicant applies for, treated as a factor. As our outcome variable is binary, we are going to use logistic regression.The model can be written as:
 
 $$Y_{i} \sim Bernoulli(p_{i}) $$
 $$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Extracurricular}_{i}+ \beta_3\text{Work Experience}_{i} + \beta_4 \text{Team applied for}_i$$
-where $Y_{i}$ is the acceptance of applicant $i$ , X_{i}s are explanatory variables.\newline
+where $Y_{i}$ is the acceptance of applicant $i$ , $X_{i}$s are explanatory variables.\newline
 
-<<<<<<< HEAD
 The model is realized in R through the `glm` function. Result is shown in table 1. Not surprisingly, we find that GPA and work experiences are all significant at level 0.05. 1 unit increase of GPA is associated with the odds of being admitted increasing by 621%. Similarly, obtaining level 1 working experience will increase the odds of passing phase in by 335%. Most importantly, variable "gender: women" is highly insignificant with p-value 0.8576, which supports the nonexistence of gender bias in the first phase of hiring. Similar thing for the category where applicants are not willing to tell their gender.
 
-
-
-## Research Question 2: Is there any gender bias in the remuneration processes?
-Black Saber Software provide us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use to is creating a boxplot of salary conditions on role seniority and gender setting, and then applying different types of regression models to see which one best serve our purpose. 
-Boxplot: 
-
-
-
-
-
-From the graph, we can see that women have lower salaries across different role seniority.
-
-In order to test whether gender bias truely exists, we need to first find the most appropriate model. We create a simple linear regression model: $$y = x1+x$$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we apply linear mixed model: $$ y =    $$, we add the variable "team"(job in the company) as the random intercept. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram. For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better. Thus, the final model is $$     $$. 
-$$   $$
-Based on interpretation, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
-
-
-
-
-
-
-
-The model is realized in R through the `glm` function. Result is shown in table 1. Not surprisingly, we find that GPA and work experiences are all significant at level 0.05. Most importantly, variable "gender: women" is highly insignificant with p-value 0.8576, which supports the nonexistence of gender bias in the first phase of hiring. Similar thing for the category where applicants are not willing to tell their gender.
-
-```{r}
+```{r, echo = FALSE}
 ## Phase 1 -> Phase 2
-## Join Phase 1 and Phase 2, create variable pass_phase1
-joint12 <- phase1 %>% left_join(phase2, by= c("applicant_id", "team_applied_for", "cover_letter","cv", "gpa", "gender", "extracurriculars", "work_experience")) %>% mutate(pass_phase1 = ifelse(is.na(technical_skills), 0, 1))
-
-## Draw Contingency Table
-table(factor(joint12$team_applied_for), factor(joint12$pass_phase1))
-
 ## Visualize Contingency Table
 joint12 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase1), fill = gender))
 
@@ -239,7 +198,7 @@ ggplot(proptable5, aes(fill = factor(pass_phase1), y = ratio, x = team_applied_f
 joint12$team_applied_for <- as.factor(joint12$team_applied_for)
 model1 <- glm(pass_phase1 ~ gpa + factor(extracurriculars) + factor(work_experience) + gender
                 + team_applied_for, family = "binomial", data = joint12)
-summary(model1)
+
 ## Calculate CI
 ci <- confint(model1)
 ## Print Result of Regression
@@ -250,46 +209,39 @@ colnames(table) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table)
 ```
 
-
-
-
 ### Phase 2 $\rightarrow$ Phase 3
-Similarly as the previous phase, we are going to check for gender bias from phase 2 to phase 3. See Figure 3 and 4 for comparison of proportion of passing phase 2 by gender and the team they apply to. In this case, we find little difference between employees that apply to data or software team which is different from the previous phase, which may suggest the insignificance of the team variable. But we still start with building model with this variable. Since applicants that are accepted from phase 1 should go through a series of tests online to check their technical skills, writing skills, our model should focus on these variables.
+Similarly as the previous phase, we are going to check for gender bias from phase 2 to phase 3. See Figure 3 and 4 for comparison of proportion of passing phase 2 by gender and the team they apply to. In this case, we find less difference between employees that apply to data or software team than the previous phase, which may indicate the insignificance of this variable. Since applicants that are accepted from phase 1 should go through a series of tests online to check their technical skills, writing skills, we start our model by adding these variables with the predictor variables in the model we built in the previous phase. 
 
+Therefore, the outcome variable is whether or not the applicant passes phase 2 and for the first model we build, the explanatory variables are GPA, technical skills, writing skills, leadership presence, speaking skills and the team applicants want to join. See the mathematical formula: 
 
+$$Y_{i} \sim Bernoulli(p_{i}) $$ 
+$$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Technical Skills}_{i}+ \beta_3\text{Writing Skills}_{i} + \beta_4 \text{Speaking Skills}_i+ \beta_5 \text{Leadership Presence}_i+
+ \beta_6\text{Team applied for}_i + \beta_7 \text{Work Experience}_i + \beta_8 \text{Extracurriculars}_i$$ 
 
+See table 2 for the result of model coefficients after exponentiation realized by `glm` function. Notice that among these predictor variables, only skill related ones are significant under level 0.05. Therefore, we would like to remove some insignificant covariates to simplify our model. By removing GPA, working experience, extracurricular and team that the applicants want to join, we come up with the final logistic regression model, written as: 
+ 
+$$\log(\frac{p_{i}}{1-p_{i}}) = \beta_0 + \beta_1 GPA_{i} + \beta_2\text{Technical Skills}_{i}+ \beta_3\text{Writing Skills}_{i} + \beta_4 \text{Speaking Skills}_i+ \beta_5 \text{Leadership Presence}_i$$ 
+See table 3 for model results and this is a better model to fit since the AIC of the model drops from 87.527 to 83.574. The result table also suggests fairness between man and women since they are still insignificance with p-value 0.4205 > 0.01.\newline 
 
-By conducting logistic regression, we find the algorithm for selecting applicant in phase 2 does not depend much on the significant variables in phase 1 but on the test scores for relevant skills and the selection process is also irrelevant with one's gender.\newline
+By conducting logistic regression, we find the algorithm for selecting applicant in phase 2 does not depend much on the significant variables in phase 1 but on the test scores for relevant skills and the selection process is also irrelevent with one's gender.\newline 
 
-
-```{r}
+```{r, echo = FALSE}
 ## Phase 2 -> Phase 3
-## Join phase2 and phase3 data and create variable pass_phase2
-joint23 <- phase2 %>% left_join(phase3, by = "applicant_id") %>% mutate(pass_phase2 = ifelse(is.na(interviewer_rating_1), 0, 1))
 
 ## Visualization for exploratory data analysis
-proptable2 <- table(factor(joint23$gender), factor(joint23$pass_phase2))
-proptable2 <- as.data.frame(prop.table(proptable2, 1))
-names(proptable2)[1]=('Gender')
-names(proptable2)[2]=('Pass')
-names(proptable2)[3]=("Proportion")
-ggplot(data=proptable2, aes(x=Gender, y=Proportion, fill=Pass)) + geom_bar(stat="identity") 
+
 joint23 %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase2), fill = gender))
 
 proptable3 <- joint23 %>% group_by(gender, team_applied_for, pass_phase2) %>% summarize(number = n()) %>% group_by(gender, team_applied_for) %>% summarize(pass_phase2 = pass_phase2, ratio = number/sum(number))
 ggplot(proptable3, aes(fill = factor(pass_phase2), y = ratio, x = team_applied_for)) + geom_bar(position = "fill", stat = "identity")+facet_grid(. ~ gender)
 
 ## Build Mixed Logistic regression model to explain whether or not phase 2 is passed
-model2 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + team_applied_for, family = "binomial", data = joint23)
-summary(model2)
+model2 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills + team_applied_for + factor(work_experience) + factor(extracurriculars), family = "binomial", data = joint23)
+
 
 model3 <- glm(pass_phase2 ~ gender + gpa + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
-summary(model3)
 
-model4 <- glm(pass_phase2 ~ gender + technical_skills + writing_skills + leadership_presence + speaking_skills, family = "binomial", data = joint23)
-summary(model4)
 
-drop_in_dev <- anova(model4, model3, model2, test="Chisq")
 
 ## Calculate CI
 ci2 <- confint(model2)
@@ -300,56 +252,76 @@ table2 <- cbind(round(exp(summary(model2)$coeff[,1]),2),
 colnames(table2) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
 kable(table2)
 
+
+ci3 <- confint(model3)
+## Print Result of Regression
+table3 <- cbind(round(exp(summary(model3)$coeff[,1]),2),
+               round(exp(ci3), 2),
+               round(summary(model3)$coeff[,4],4))
+colnames(table3) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+kable(table3)
+
+
 ```
+
 ### Phase 3 to Final Result
-The methodology we use to deal with this phase is different from the first two phases. Since being listed as ‘first’ or ‘second’ interviewer is arbitrary, we create a new variable "sum" that is the sum of ratings by two interviewers. After sorting the sum of ratings for applicants who engaged in the interview and select top 10 applicants to match with the actual accepted interviewees, it is found that 9 of them is perfectly matched. Therefore, we can roughly make inference that the decision made in the last stage depends mostly on the interviewers' scores. Hence, we are going to test if their is gender bias by con
+The methodology we use to deal with this phase is different from the first two phases. Since being listed as ‘first’ or ‘second’ interviewer is arbitrary, we create a new variable "sum" that is the sum of ratings by two interviewers. After sorting the sum of ratings for applicants who engaged in the interview and select top 10 applicants to match with the actual accepted interviewees, it is found that 9 of them is perfectly matched. Therefore, we can roughly make inference that the decision made in the last stage depends mostly on the interviewers' scores. Hence, we are going to test if there exists gender bias by modeling the factors that may influence the interviewer's score.\newline
 
+Here we are going to build the multiple linear regression model, where the outcome variable is the sum of two interviewers' score and the predictor variables are technical skills, writing skills, speaking skills, leadership presence and categorical variable gender, written as:
+$$Y_i = \beta_0  + \beta_1\text{gender}_i + \beta_2\text{Technical Skills}_{i}+ \beta_3\text{Writing Skills}_{i} + \beta_4 \text{Speaking Skills}_i+ \beta_5 \text{Leadership Presence}_i + \epsilon_i$$
+Table 3 shows the results of the simple linear regression. All the skills related variables are significant except for the categorical variable gender with p value 0.6898, which supports the fairness of the hiring process.\newline
 
+Therefore, we conclude that there is no gender bias during the process of hiring in Black Saber Software Company.\newline
 
-
-
-
-
-```{r}
-## Phase 3 -> Final Result
-final_hire <- final_hire %>% mutate(pass_phase3 = 1)
-joint3f <- joint23 %>% filter(is.na(interviewer_rating_1)==FALSE) %>% left_join(final_hire, by = "applicant_id")
-joint3f$pass_phase3[is.na(joint3f$pass_phase3)] <- 0 
+```{r, echo = FALSE}
+## Phase 3 -> Final
 
 joint3f %>% ggplot() + geom_mosaic(aes(x = product(gender, pass_phase3), fill = gender))
 
 
-model5 <- glm(pass_phase_3 ~ gender + interviewer_rating_1:interviewer_rating_2, data = joint3f, family = "binomial")
-summary(model5)
+model5 <- glm(pass_phase3 ~ gender + interviewer_rating_1:interviewer_rating_2, data = joint3f, family = "binomial")
+
 
 
 joint_3f <- joint3f %>% mutate(sum = interviewer_rating_1+interviewer_rating_2)
 
-sort(joint_3f[
-  order(- joint_3f[,17] ),
-][1:10, ]$applicant_id)
+#sort(joint_3f[
+  #order(- joint_3f[,17] ),
+#][1:10, ]$applicant_id)
 
-sort(final_hire$applicant_id)
+#sort(final_hire$applicant_id)
 
 model5 <- lm(sum ~ technical_skills + writing_skills + leadership_presence + speaking_skills + gender, data = joint_3f)
-summary(model5)
+
+
+ci5 <- confint(model5)
+## Print Result of Regression
+table5 <- cbind(round(exp(summary(model5)$coeff[,1]),2),
+               round(exp(ci5), 2),
+               round(summary(model5)$coeff[,4],4))
+colnames(table5) <- c("Estimate", "Lower Limit", "Upper Limit", "p-value")
+kable(table5)
+
 ```
 
 ## Research Question 2: Is there any gender bias in the remuneration processes?
-Black Saber Software provide us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use to is creating a boxplot of salary conditions on role seniority and gender setting, and then applying different types of regression models to see which one best serve our purpose. 
+Black Saber Software provides us with data about promotion and salary for the entire staff. The data we get consists information of the staff including annual salary, gender, job in the company, financial quarter salary, productivity, role seniority, and quality of demonstrated leadership. We use these data to investigate whether there is any gender bias in remuneration process. The general methodology that we use to is creating a boxplot of salary conditions on role seniority and gender setting, and then applying different types of regression models to see which one best serve our purpose. 
 Boxplot: 
 
 
 
-joint3f %>% mutate(mean = mean(interviewer_rating_1, interviewer_rating_2))
-```
 
 
-```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+From the graph, we can see that women have lower salaries across different role seniority.
+
+In order to test whether gender bias truely exists, we need to first find the most appropriate model. We create a simple linear regression model: $$y = x1+x$$, we find out that gender is statistically significant, which suggests gender has impacts on salaries. Moving on from SLR, we apply linear mixed model: $$ y =    $$, we add the variable "team"(job in the company) as the random intercept. We do such because we think there should be variations in salaries across different jobs in the company. The likelihood ratio test tells us including such does explain the data better. The results from the linear mixed model also show us that gender is significant. Next, we add a random slope to the previous model because the effect of the productivity may be different for different jobs in the company. After the likelihood ratio test, we find that slopes are an unnecessary complication to our model. Finally, we add role seniority as another random intercept because there should be variations in the salaries across different role seniority based on our histogram. For example, senior workers have higher salaries than junior workers. The likelihood ratio test tells us that including this random intercept does explain the model better. Thus, the final model is $$    SED $$. 
+$$ SDF  $$
+Based on interpretation, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
+
+
+```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE, eval = FALSE}
 #chunk new created by Peter
-
-
-black_saber_current_employees %>%
+cemployees %>%
   filter(gender != "Prefer not to say")%>%
   group_by(employee_id)%>%
   ggplot(aes(x = role_seniority, y = salary, color = gender))+
@@ -421,7 +393,7 @@ new_cemployees %>%
   theme(legend.position = "right")
 ```
 
-```{r}
+```{r, eval = FALSE, echo = FALSE}
 b = cemployees %>%
   group_by(employee_id)%>%
   count(role_seniority)
