@@ -319,26 +319,12 @@ $$ SDF  $$
 Based on interpretation, Woman has lower salary by an average of $\$1758$ than man. This result indicates that there is gender bias in remuneration. 
 
 
-```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE, eval = FALSE}
+```{r,include=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 #chunk new created by Peter
-cemployees %>%
-  filter(gender != "Prefer not to say")%>%
-  group_by(employee_id)%>%
-  ggplot(aes(x = role_seniority, y = salary, color = gender))+
-  geom_boxplot()+
-  theme_minimal() +
-  scale_colour_brewer(palette = "Dark2")+
-  theme(legend.position = "right")
-
-cemployees %>% 
-  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]"))
-reg_salary = lmer(salary~productivity+(1|role_seniority), data =cemployees)
-
 ## check if salary are fair in gender(gender)
 new_cemployees =  cemployees%>%
   mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
   mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))
-
 #create a histogram of salary condition on role seniority
 new_cemployees %>%
   ggplot(aes(x = salary)) +
@@ -348,32 +334,18 @@ new_cemployees %>%
   ggtitle(label="Histogram of salary condition on role seniority") +
   theme_bw() +
   theme(legend.position = "right")
-
-
 new_cemployees = new_cemployees%>%
   filter(gender!="Prefer not to say")%>%
   mutate(role_seniority = fct_relevel(role_seniority, "Director", after = 7))
 new_cemployees = new_cemployees%>%
   mutate(role_seniority = fct_relevel(role_seniority, "Manager", after = 6))
-
 reg_salary_1 = lm(salary~productivity+gender, data =new_cemployees)
 reg_salary_2 = lmer(salary~productivity+gender+(1|team), data =new_cemployees)
 #lmtest::lrtest(reg_salary_1, reg_salary_2) #check if adding team as random intercept is more significant
-
-
-new_cemployees =  cemployees%>%
-  mutate(salary = str_remove_all(cemployees$salary,"[[:punct:]]")) %>%
-  mutate(salary = as.integer(str_remove_all(cemployees$salary,"[^[:alnum:]]")))%>%
-  filter(gender!="Prefer not to say")
-
 reg_salary_2a = lmer(salary~productivity+gender+(1+productivity|team), data =new_cemployees)
 #lmtest::lrtest(reg_salary_2, reg_salary_2a) #check if there productivity are different for different team
-
-
 reg_salary_3 = lmer(salary~productivity+gender+(1|team)+(1|role_seniority), data =new_cemployees)
 lmtest::lrtest(reg_salary_2, reg_salary_3)#check if role seniority as random intercept(baseline) is more significant
-
-
 ## Calculate CI
 ci2 <- confint(reg_salary_3)
 ## Print Result of Regression
@@ -381,7 +353,6 @@ reg_salary <- cbind(round(summary(reg_salary_3)$coeff[,1],2))
 rownames(reg_salary) <- c("Intecept","Productivity","GenderWomen")
 colnames(reg_salary)=c("Estimates")
 kable(reg_salary)
-
 #create a boxplot
 new_cemployees %>%
   ggplot(aes(x = role_seniority,
@@ -393,23 +364,14 @@ new_cemployees %>%
   theme(legend.position = "right")
 ```
 
-```{r, eval = FALSE, echo = FALSE}
+
+
+```{r}
 b = cemployees %>%
   group_by(employee_id)%>%
   count(role_seniority)
 colnames(b)[3] ="time_since_promotion" 
-
-
-new_cemployees %>% 
-  ggplot(aes(y = salary, x = productivity,color = gender)) +
-  geom_point()+
-  geom_line(stat="smooth", method = "lm", formula = 'y~x') +
-  facet_grid(~role_seniority) +
-  scale_x_continuous(breaks = seq(2,12, by = 4)) +
-  scale_fill_brewer(palette = "Dark2")+
-  theme(legend.position = "right")+
-  theme_minimal()
-
+  
 ```
 ## Discussion
 
