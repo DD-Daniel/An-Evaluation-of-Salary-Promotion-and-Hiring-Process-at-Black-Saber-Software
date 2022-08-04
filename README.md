@@ -33,6 +33,10 @@ analyzing data of acceptance and rejection during interview, there is still no g
 observed.
 
 • Overall, current male employees have higher salary compared to their female counterparts
+
+
+
+
 who have the same role seniority under the same department (see Figure 2). Female
 employees are not paid with the same amount salaries even if they have the same amount
 of workloads as male employees
