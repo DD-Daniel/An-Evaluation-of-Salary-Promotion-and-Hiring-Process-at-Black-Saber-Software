@@ -1,11 +1,9 @@
-# An Evaluation of Salary,
-# Promotion, and Hiring Process at
-# Black Saber Software
-# Evidence of Gender Bias in Salary
-# Report prepared for Black Saber Software by Calabash
-# Brothers Solutions
+### An Evaluation of Salary, Promotion, and Hiring Process at Black Saber Software
+#### Evidence of Gender Bias in Salary
+#### Report prepared for Black Saber Software by Calabash
+#### Brothers Solutions
 
-## Executive summary
+### Executive summary
 Over the past few months, several software companies had received bad press about their hiring
 and remuneration processes, during which human bias are present. As a consequence, people
 have been raising concerns about potential bias in the recruitment and promotion process of
